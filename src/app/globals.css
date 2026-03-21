@@ -2,25 +2,50 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1a1a2e;
 }
 
 @theme inline {
+  /* Fonts */
+  --font-sans: var(--font-montserrat);
+  --font-body: var(--font-roboto);
+
+  /* Brand colours */
+  --color-primary:       #1E3A8A;
+  --color-primary-dark:  #162d6e;
+  --color-primary-light: #2f54c8;
+  --color-accent:        #34D399;
+  --color-accent-dark:   #10b981;
+  --color-accent-light:  #6ee7b7;
+
+  /* Neutrals */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-surface:    #f8fafc;
+  --color-muted:      #64748b;
+  --color-border:     #e2e8f0;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Breakpoints (Tailwind alapértelmezetteket megtartjuk, de dokumentáljuk) */
+  /* sm: 640px | md: 768px | lg: 1024px | xl: 1280px | 2xl: 1536px */
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body, 'Roboto', sans-serif);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans, 'Montserrat', sans-serif);
+}
+
+/* Smooth scrolling az egész oldalon */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Alapértelmezett fókusz gyűrű a11y-hoz */
+*:focus-visible {
+  outline: 2px solid #34D399;
+  outline-offset: 2px;
 }
