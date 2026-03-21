@@ -23,32 +23,32 @@ const plans: PricingPlan[] = [
     ],
   },
   {
-    name: "5 alkalmas bérlet",
+    name: "Gerinc-rehabilitációs program",
     price: "54 000 Ft",
     duration: "5 × 60 perc",
-    description: "A legnépszerűbb csomag – 10% kedvezménnyel az egyedi árhoz képest.",
+    description: "5 alkalmas program – az akut panaszok megszüntetéséhez és a stabilitás kialakításához.",
     features: [
-      "Minden, ami az egyedi kezelésben",
+      "Minden, ami az alap kezelésben",
       "10% megtakarítás",
       "Rugalmas időpontok",
       "Telefonos konzultáció kezelések között",
-      "Személyre szabott edzésterv",
+      "Személyre szabott otthoni gyakorlatsor",
     ],
     highlighted: true,
   },
   {
-    name: "10 alkalmas bérlet",
+    name: "Krónikus fájdalom megszüntetése",
     price: "96 000 Ft",
     duration: "10 × 60 perc",
-    description: "Krónikus panaszok tartós megoldásához – 20% megtakarítással.",
+    description: "10 alkalmas program – tartós megoldás régóta fennálló, visszatérő panaszokra.",
     features: [
-      "Minden, ami az 5 alkalmasban",
+      "Minden, ami az 5 alkalmas programban",
       "20% megtakarítás",
       "Elsőbbségi időpontfoglalás",
-      "Havi haladásértékelő",
-      "Email/Messenger tanácsadás",
+      "Havi haladásértékelő és felülvizsgálat",
+      "Email/Messenger tanácsadás a program alatt",
     ],
-  },
+  }
 ];
 
 export default function PricingSection() {

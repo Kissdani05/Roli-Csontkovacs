@@ -2,52 +2,52 @@ import ServiceCard from "@/components/ui/ServiceCard";
 
 const services = [
   {
-    icon: "🦴",
-    title: "Derékfájás kezelése",
+    icon: "🌅",
+    title: "Reggeli merevség a derékban",
     description:
-      "Manuális technikákkal oldja fel a lumbális gerinc feszültségét és helyreállítja a mozgástartományt.",
+      "Nehezen kelsz fel reggel, mert a derékad beáll? Néhány célzott kezeléssel megszüntetjük az izomszabályozás zavarát, és újra rugalmasan indulhatsz napnak.",
   },
   {
-    icon: "🧠",
-    title: "Nyakfájás és fejfájás",
+    icon: "💻",
+    title: "Munkából hazaérve hasogató hátfájdalom",
     description:
-      "Nyaki csigolyák korrekciója, izomfeszültség oldása – enyhíti a migrénes és feszültséges fejfájást.",
-  },
-  {
-    icon: "🦵",
-    title: "Ízületi panaszok",
-    description:
-      "Váll-, csípő-, térd- és bokaízületek mozgékonyságának javítása manuálterápiával.",
-  },
-  {
-    icon: "🧘",
-    title: "Tartáskorrekció",
-    description:
-      "Helytelen testtartásból fakadó fájdalmak megszüntetése, megelőző kezelési terv kidolgozása.",
+      "Az íróasztalnál töltött órák felhalmozzák a feszültséget a nyaki és háti izmokban. Az egész gerinc tehermentesítésével tartós könnyebbséget érsz el.",
   },
   {
     icon: "⚡",
-    title: "Oszteopátia",
+    title: "Zsibbadó kéz, szúró nyakfájalom",
     description:
-      "A test egészét figyelembe vevő holisztikus szemléletű kezelés – csontok, izmok, fascia.",
+      "Ha ülés közben vagy éjjel zsibbad a kezed, a nyaki csigolyák szoríthatnak egy ideggyököt. Ez pontosan az a probléma, amit manuálterápiával meg tudok oldani.",
   },
   {
     icon: "🏃",
-    title: "Sportolók kezelése",
+    title: "Sportolás közbeni fájdalom vagy régi sérülés",
     description:
-      "Sportsérülések utáni rehabilitáció, teljesítménynövelés, megelőző mozgásterápiai tanácsadás.",
+      "Futás, edzés közben fáj a csípőd vagy a térded? Régi bokasérülés miatt nem mered megtolni magad? Rehabilitálom a sérülést és megelőzöm a visszaesést.",
   },
   {
     icon: "🤰",
-    title: "Kismama kezelés",
+    title: "Terhesség alatti és utáni derék- és medencefájdalom",
     description:
-      "Terhesség alatti és szülés utáni mozgásszervi panaszok kíméletes, biztonságos kezelése.",
+      "A terhesség megváltoztatja a testsúly eloszlását és a medence ízületeit. Kíméletes, biztonságos technikákkal segítek a fájdalommentes terhességben és a szülés utáni felépülésben.",
+  },
+  {
+    icon: "🧘",
+    title: "Fejfájás, amit nem old meg a fájdalomcsillapító",
+    description:
+      "A visszatérő feszültséges fejfájás és migrén sok esetben a nyaki izmok és csigolyák problémájából ered – nem az agyadból. A forrást kezelem, nem a tünetet.",
+  },
+  {
+    icon: "🪑",
+    title: "Görbe tartás, előreesett váll",
+    description:
+      "Az évek óta begörnyedve töltött munka látszik a tartásodon? Nem esztétikai kérdés – ez fájdalmak forrása. Strukturált tartáskorrekcióval visszahozom az egyenes gerincet.",
   },
   {
     icon: "👴",
-    title: "Időskorúak terápiája",
+    title: "Időskorúak mozgáskorlátozottsága",
     description:
-      "Arthritis, csontritkulás melletti mozgásmegőrzés, fájdalomcsökkentés gyengéd módszerekkel.",
+      "Az ízületi kopás és csontritkulás nem jelenti azt, hogy fájdalommal kell élni. Gyengéd módszerekkel javítom a mozgékonyságot és csökkentem a fájdalmat.",
   },
 ];
 

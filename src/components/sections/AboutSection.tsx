@@ -40,28 +40,28 @@ export default function AboutSection() {
             </h2>
             <div className="space-y-4 text-muted leading-relaxed">
               <p>
-                Több mint 10 éve segítek az embereknek, hogy visszanyerjék mozgékonyságukat
-                és megszabaduljanak a krónikus fájdalomtól. Csontkovács és manuálterapeuta
-                képesítéssel rendelkezem, folyamatosan fejlesztem tudásomat.
+                Tizenéves koromban én is szenvedtem gerincsérvessel. Hónapokig jártam
+                orvostól orvosig, és mindenki azt mondta: &ldquo;éljek együtt
+                vele.&rdquo; Egy csontkovács volt az, aki végül megoldotta – három
+                alkalom alatt. Akkor döntöttem el, hogy én is ezt fogom csinálni.
               </p>
               <p>
-                Hiszem, hogy a test egy egységes rendszer – nem csak a tünetet kezelem,
-                hanem megkeresem és megszüntetem a valódi okot. Holisztikus szemléletemnek
-                köszönhetően tartós eredményeket érek el.
+                Azóta több mint 10 éve dolgozom Józsán. Minden páciensnél megkeresem
+                a valódi okot – nem csak a tünetet kezelem. Mert a fájdalom mindig
+                üzenetet hordoz, és azt kell megérteni és megszüntetni, nem elfedni.
               </p>
               <p>
-                Józsán dolgozom, ahol barátságos, nyugodt környezetben fogadlak.
-                Az első konzultáció ingyenes, ahol megismerkedünk és megbeszéljük a
-                kezelési tervet.
+                Ha idejössz, nem érzed majd magad &ldquo;következő páciens&rdquo;-nek.
+                Időt szánok rád, meghallgatlak, és közösen tervezzük meg a gyógyulásodat.
               </p>
             </div>
 
             <ul className="mt-6 space-y-2 text-sm text-foreground">
               {[
-                "✅ Csontkovács szakképesítés",
-                "✅ Manuálterápiás oklevél",
-                "✅ Sportmasszőr képesítés",
-                "✅ Rendszeres szakmai továbbképzések",
+                "✅ Manuálterápiás oklevél – [Intézmény neve, év]",
+                "✅ Csontkovács szakképesítés – [Intézmény neve, év]",
+                "✅ Sportrehabilitációs továbbképzés – [év]",
+                "✅ Gyógytornász asszisztens képesítés – [Intézmény neve, év]",
               ].map((item) => (
                 <li key={item}>{item}</li>
               ))}

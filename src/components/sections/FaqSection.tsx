@@ -33,6 +33,11 @@ const faqs: FaqItem[] = [
     answer:
       "Csontritkulás előrehaladott esetén, friss csonttörés, aktív gyulladás, daganatos betegség vagy vérzékenység esetén nem végzek kezelést. Ha bizonytalan vagy, konzultálj előbb az orvosoddal, illetve vedd fel velem a kapcsolatot és közösen döntjük el.",
   },
+  {
+    question: "Hogyan kell készülnöm az első kezelésre?",
+    answer:
+      "Nem kell semmi különleges előkészület. Hozd magaddal a korábbi leleteket (ha vannak), vegyél fel kényelmes ruhát, és – ami a legfontosabb – hozd magaddal a kérdéseidet. Az első alkalom 60-75 perc, mert részletes állapotfelmérést végzek. Étkezés után legalább 1-1,5 órával gyere, hogy a derekad ne legyen feszült.",
+  },
 ];
 
 export default function FaqSection() {

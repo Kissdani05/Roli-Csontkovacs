@@ -1,10 +1,11 @@
 interface ReviewCardProps {
   quote: string;
   name: string;
+  location?: string;
   stars?: number;
 }
 
-export default function ReviewCard({ quote, name, stars = 5 }: ReviewCardProps) {
+export default function ReviewCard({ quote, name, location, stars = 5 }: ReviewCardProps) {
   return (
     <article className="bg-white rounded-2xl p-6 shadow-sm border border-border flex flex-col gap-4">
       {/* Csillagok */}
@@ -28,8 +29,13 @@ export default function ReviewCard({ quote, name, stars = 5 }: ReviewCardProps) 
         &ldquo;{quote}&rdquo;
       </blockquote>
 
-      {/* Név */}
-      <p className="text-sm font-semibold text-primary">— {name}</p>
+      {/* Név + helyszín */}
+      <div>
+        <p className="text-sm font-semibold text-primary">— {name}</p>
+        {location && (
+          <p className="text-xs text-muted mt-0.5">{location}</p>
+        )}
+      </div>
     </article>
   );
 }

@@ -3,38 +3,44 @@ import ReviewCard from "@/components/ui/ReviewCard";
 const reviews = [
   {
     quote:
-      "Évekig szenvedtem derékfájással. Roli három kezelés után megszüntette a fájdalmamat. Hihetetlen! Mindenkinek ajánlom.",
-    name: "Kovács Éva",
+      "3 éve cipeltük a derékfájásomat, gondoltam, már csak a műtét segít. Félve mentem el Rolihoz, de ő már az első kezelésen elmagyarázta, mi a valódi ok. 5 alkalom után teljesen fájdalommentesen kelek reggel. Ezt nem hagyhatom szó nélkül – mindenkinek ajánlom!",
+    name: "K. Éva, 47 éves",
+    location: "Debrecen",
     stars: 5,
   },
   {
     quote:
-      "Nyaki fájdalmam és a fejfájásos rohamaim megszűntek. Profizmus és empátia – ez jellemzi Rolit. Hálás vagyok!",
-    name: "Nagy Péter",
+      "Heti rendszerességgel kaptam fejfájást. Orvostól orvosig jártam, mindenki tablettát adott. Roli volt az első, aki megkereste az okot: a nyaki izmaim szorítottak egy ideget. Két kezelés után a fejfájások 90%-ban megszűntek.",
+    name: "N. Péter, 38 éves",
+    location: "Józsa",
     stars: 5,
   },
   {
     quote:
-      "Sportolóként sokat számít a gyors rehabilitáció. Roli segítségével 2 héttel korábban térhettem vissza az edzéshez.",
-    name: "Tóth Márton",
+      "Bokasérülésem után abbahagytam a futást, féltem, hogy soha nem lesz olyan mint régen. Roli nemcsak a bokámat kezelte, hanem az egész kompenzációs láncot. 6 hét alatt visszatértem a versenyfelkészüléshez.",
+    name: "T. Márton, 29 éves",
+    location: "Hajdúböszörmény",
     stars: 5,
   },
   {
     quote:
-      "Féltem az első kezeléstől, de Roli megnyugtatott és mindent elmagyarázott. Azóta rendszeresen járok hozzá.",
-    name: "Szabó Katalin",
+      "Terhesség alatt olyan erős medencefájdalmam volt, hogy nehezen tudtam járni. Roli kíméletes, biztonságos technikákkal hozta rendbe a medencémet. Azonnal éreztem a különbséget. Szülés után is visszamentem hozzá.",
+    name: "Sz. Katalin, 32 éves",
+    location: "Debrecen",
     stars: 5,
   },
   {
     quote:
-      "Anyukámat vittem el idős kori ízületi fájdalmaival. Csodaszép eredmény, már sétálni is könnyebben tud.",
-    name: "Horváth Zoltán",
+      "Az édesanyám 72 éves, és térdfájdalma miatt alig tudott lépcsőt mászni. Nem hittük, hogy sokat segíthet, de 4 kezelés után önállóan jár fel az emeletre. Roli türelme és szakértelme idős pácienseknél is csodákat tesz.",
+    name: "H. Zoltán, 44 éves",
+    location: "Nyíregyháza",
     stars: 5,
   },
   {
     quote:
-      "Irodai munkából fakadó gerinc- és vállproblémáim kezelése teljesen megváltozott az életemen. Roli szakértelme és a személyre szabott figyelme egyedülálló.",
-    name: "Kiss Réka",
+      "8 évig dolgoztam görnyedve a számítógép előtt, a vállam és nyakam állandóan fájt. Próbáltam masszázst, gyógytornát, semmi sem segített tartósan. Roli 3 alkalom alatt megoldotta, amit eddig senki sem tudott.",
+    name: "K. Réka, 35 éves",
+    location: "Debrecen",
     stars: 5,
   },
 ];
@@ -64,7 +70,7 @@ export default function ReviewsSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {reviews.map((r) => (
-            <ReviewCard key={r.name} {...r} />
+            <ReviewCard key={r.name} quote={r.quote} name={r.name} location={r.location} stars={r.stars} />
           ))}
         </div>
 

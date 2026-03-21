@@ -20,15 +20,16 @@ export default function HeroSection() {
       {/* Tartalom */}
       <div className="relative z-10 text-center text-white px-4 sm:px-6 max-w-3xl mx-auto pt-16">
         <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-4">
-          Csontkovács &amp; Manuálterapeuta · Józsa
+          Okleveles Manuálterapeuta &amp; Csontkovács · Józsa
         </p>
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
-          Élj fájdalom nélkül –{" "}
-          <span className="text-accent">természetes módon</span>
+          Eleged van a fájdalomból,{" "}
+          <span className="text-accent">ami korlátoz minden nap?</span>
         </h1>
         <p className="text-lg sm:text-xl text-white/85 mb-10 leading-relaxed">
-          Derék-, nyak- és ízületi panaszaid kezelése szakértő kézzel,
-          gyógyszermentes megközelítéssel. Gyere el és érezd a változást!
+          Roli vagyok, okleveles manuálterapeuta Józsán. Segítek visszaállítani
+          tested egyensúlyát, hogy újra fájdalommentesen mozoghass –{" "}
+          gyógyszer nélkül, természetes úton.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <CTAButton href="#idopontfoglalas" size="lg">
