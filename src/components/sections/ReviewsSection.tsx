@@ -33,7 +33,7 @@ const reviews = [
   },
   {
     quote:
-      "Irodai munkából fakadó gerinc- és vállproblémáim kezeltte. Roli szakértelme és személyessége egyedülálló.",
+      "Irodai munkából fakadó gerinc- és vállproblémáim kezelése teljesen megváltozott az életemen. Roli szakértelme és a személyre szabott figyelme egyedülálló.",
     name: "Kiss Réka",
     stars: 5,
   },

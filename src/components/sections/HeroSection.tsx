@@ -20,7 +20,7 @@ export default function HeroSection() {
       {/* Tartalom */}
       <div className="relative z-10 text-center text-white px-4 sm:px-6 max-w-3xl mx-auto pt-16">
         <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-4">
-          Csontkovász &amp; Manuálterapeuta · Józsa
+          Csontkovács &amp; Manuálterapeuta · Józsa
         </p>
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
           Élj fájdalom nélkül –{" "}
@@ -34,7 +34,7 @@ export default function HeroSection() {
           <CTAButton href="#idopontfoglalas" size="lg">
             Foglalj időpontot →
           </CTAButton>
-          <CTAButton href="#szolgaltatasok" variant="outline" size="lg">
+          <CTAButton href="#rolam" variant="outline" size="lg">
             Ismerj meg
           </CTAButton>
         </div>

@@ -11,10 +11,10 @@ interface PricingPlan {
 
 const plans: PricingPlan[] = [
   {
-    name: "Egyedi kezelés",
+    name: "Alap kezelés",
     price: "12 000 Ft",
     duration: "60 perc",
-    description: "Egyszeri alkalom – ideális az első kezeléshez vagy próbaként.",
+    description: "Egyszeri alkalom – állapotfelmérés és első kezelés egy alkalommal.",
     features: [
       "Teljes körű felmérés",
       "Manuális kezelés",

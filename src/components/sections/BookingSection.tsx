@@ -42,7 +42,7 @@ export default function BookingSection() {
           <div className="text-6xl mb-4">🎉</div>
           <h2 className="text-3xl font-extrabold text-white mb-4">Köszönöm!</h2>
           <p className="text-white/80 text-lg">
-            Kérésedet megkaptam. Hamarosan visszahívlak a megerősítéshez.
+            Időpont kérelmedet megkaptam. Hamarosan visszahívlak az egyeztetéshez.
           </p>
         </div>
       </section>
@@ -58,16 +58,16 @@ export default function BookingSection() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-2">
-            Online foglalás
+            Időpont kérése
           </p>
           <h2
             id="booking-heading"
             className="text-3xl sm:text-4xl font-extrabold text-white"
           >
-            Foglalj időpontot most!
+            Kérj időpontot online!
           </h2>
           <p className="mt-4 text-white/70 max-w-xl mx-auto">
-            Válassz napot és időpontot, majd töltsd ki az adataidat. Visszahívlak a megerősítéshez.
+            Válassz napot és időpontot, majd add meg az adataidat. Visszahívlak az egyeztetéshez – az időpont a visszaigazolással véglegesül.
           </p>
         </div>
 
@@ -192,11 +192,11 @@ export default function BookingSection() {
               disabled={!selectedDate || !selectedTime}
               className="w-full bg-accent text-white font-semibold py-3 rounded-xl hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
             >
-              Foglalás elküldése →
+              Időpont kérése elküldése →
             </button>
 
             <p className="text-xs text-muted text-center">
-              Az adatokat kizárólag az időpont visszaigazolásához használom.{" "}
+              Az adatokat kizárólag az időpont egyeztetéséhez használom.{" "}
               <a href="/adatkezeles" className="underline hover:text-primary">
                 Adatkezelési tájékoztató
               </a>

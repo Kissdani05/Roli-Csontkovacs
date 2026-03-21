@@ -41,7 +41,7 @@ export default function AboutSection() {
             <div className="space-y-4 text-muted leading-relaxed">
               <p>
                 Több mint 10 éve segítek az embereknek, hogy visszanyerjék mozgékonyságukat
-                és megszabaduljanak a krónikus fájdalomtól. Csontkovász és manuálterapeuta
+                és megszabaduljanak a krónikus fájdalomtól. Csontkovács és manuálterapeuta
                 képesítéssel rendelkezem, folyamatosan fejlesztem tudásomat.
               </p>
               <p>
@@ -58,7 +58,7 @@ export default function AboutSection() {
 
             <ul className="mt-6 space-y-2 text-sm text-foreground">
               {[
-                "✅ Csontkovász szakképesítés",
+                "✅ Csontkovács szakképesítés",
                 "✅ Manuálterápiás oklevél",
                 "✅ Sportmasszőr képesítés",
                 "✅ Rendszeres szakmai továbbképzések",

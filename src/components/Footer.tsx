@@ -14,7 +14,7 @@ export default function Footer() {
               Roli <span className="text-accent">Csontkovács</span>
             </h2>
             <p className="text-white/70 text-sm leading-relaxed">
-              Csontkovász és manuálterapeuta Debrecen–Józsán. Fájdalommentes életet segítek elérni.
+              Csontkovács és manuálterapeuta Debrecen–Józsán. Fájdalommentes életet segítek elérni.
             </p>
           </div>
 
@@ -80,6 +80,21 @@ export default function Footer() {
               </ul>
             </nav>
           </div>
+        </div>
+
+        {/* Google Térkép */}
+        <div className="mb-10 rounded-2xl overflow-hidden">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2693.5!2d21.6167!3d47.6333!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDfCsDM4JzAwLjAiTiAyMcKwMzcnMDAuMCJF!5e0!3m2!1shu!2shu!4v1234567890"
+            width="100%"
+            height="220"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Roli Csontkovács rendelője a térképen – Józsa, Debrecen"
+            className="w-full"
+          />
         </div>
 
         <div className="border-t border-white/20 pt-6 text-center text-xs text-white/50">

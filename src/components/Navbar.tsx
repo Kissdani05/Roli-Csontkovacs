@@ -6,6 +6,7 @@ import Link from "next/link";
 const navLinks = [
   { href: "#szolgaltatasok", label: "Szolgáltatások" },
   { href: "#rolam", label: "Rólam" },
+  { href: "#gyik", label: "GYIK" },
   { href: "#arak", label: "Árak" },
   { href: "#velemenyek", label: "Vélemények" },
   { href: "#idopontfoglalas", label: "Időpontfoglalás" },

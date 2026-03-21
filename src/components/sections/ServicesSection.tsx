@@ -27,7 +27,7 @@ const services = [
   },
   {
     icon: "⚡",
-    title: "Oszteopatia",
+    title: "Oszteopátia",
     description:
       "A test egészét figyelembe vevő holisztikus szemléletű kezelés – csontok, izmok, fascia.",
   },
@@ -67,7 +67,7 @@ export default function ServicesSection() {
             id="services-heading"
             className="text-3xl sm:text-4xl font-extrabold text-primary"
           >
-            Kezeit és megoldott problémák
+            Milyen panaszokkal fordulhatsz hozzám?
           </h2>
           <p className="mt-4 text-muted max-w-xl mx-auto">
             Széles körű tapasztalattal rendelkezem az alábbi panaszok kezelésében.
