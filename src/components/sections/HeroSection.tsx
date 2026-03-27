@@ -1,5 +1,7 @@
 import Image from "next/image";
 import CTAButton from "@/components/ui/CTAButton";
+import BookingOpenButton from "@/components/ui/BookingOpenButton";
+import FadeInView from "@/components/ui/FadeInView";
 
 export default function HeroSection() {
   return (
@@ -15,26 +17,26 @@ export default function HeroSection() {
       />
 
       {/* Sötétítő réteg */}
-      <div className="absolute inset-0 bg-primary/70" />
+      <div className="absolute inset-0 bg-black/45" />
 
       {/* Tartalom */}
       <div className="relative z-10 text-center text-white px-4 sm:px-6 max-w-3xl mx-auto pt-16">
-        <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-4">
+        <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-4 [text-shadow:0_1px_12px_rgba(0,0,0,0.9)]">
           Okleveles Manuálterapeuta &amp; Csontkovács · Józsa
         </p>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium leading-tight mb-8">
           Eleged van a fájdalomból,{" "}
-          <span className="text-accent">ami korlátoz minden nap?</span>
+          <span className="text-accent [text-shadow:0_1px_12px_rgba(0,0,0,0.9)]">ami korlátoz minden nap?</span>
         </h1>
-        <p className="text-lg sm:text-xl text-white/85 mb-10 leading-relaxed">
+        <p className="text-lg sm:text-xl text-white/85 mb-12 leading-loose">
           Roli vagyok, okleveles manuálterapeuta Józsán. Segítek visszaállítani
           tested egyensúlyát, hogy újra fájdalommentesen mozoghass –{" "}
           gyógyszer nélkül, természetes úton.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <CTAButton href="#idopontfoglalas" size="lg">
+          <BookingOpenButton size="lg">
             Foglalj időpontot →
-          </CTAButton>
+          </BookingOpenButton>
           <CTAButton href="#rolam" variant="outline" size="lg">
             Ismerj meg
           </CTAButton>
@@ -43,8 +45,8 @@ export default function HeroSection() {
 
       {/* Lefelé nyíl */}
       <a
-        href="#szolgaltatasok"
-        aria-label="Görgess le a szolgáltatásokhoz"
+        href="#rolam"
+        aria-label="Görgess le a Rólam szekcióhoz"
         className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/60 hover:text-accent transition-colors animate-bounce"
       >
         <svg

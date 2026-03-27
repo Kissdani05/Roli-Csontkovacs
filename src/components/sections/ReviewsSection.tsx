@@ -1,4 +1,5 @@
 import ReviewCard from "@/components/ui/ReviewCard";
+import FadeInView from "@/components/ui/FadeInView";
 
 const reviews = [
   {
@@ -49,28 +50,30 @@ export default function ReviewsSection() {
   return (
     <section
       id="velemenyek"
-      className="py-20 bg-white"
+      className="py-16 md:py-32 bg-background"
       aria-labelledby="reviews-heading"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-2">
+        <div className="text-center mb-16">
+          <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-3">
             Mit mondanak rólam?
           </p>
           <h2
             id="reviews-heading"
-            className="text-3xl sm:text-4xl font-extrabold text-primary"
+            className="text-3xl sm:text-4xl font-medium text-primary"
           >
             Vendégeim tapasztalatai
           </h2>
-          <p className="mt-4 text-muted max-w-xl mx-auto">
+          <p className="mt-6 text-muted max-w-xl mx-auto leading-relaxed">
             Több száz elégedett vendég bizalmát élvezem. Olvasd el, mit tapasztaltak!
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reviews.map((r) => (
-            <ReviewCard key={r.name} quote={r.quote} name={r.name} location={r.location} stars={r.stars} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {reviews.map((r, i) => (
+            <FadeInView key={r.name} delay={i * 0.09}>
+              <ReviewCard quote={r.quote} name={r.name} location={r.location} stars={r.stars} />
+            </FadeInView>
           ))}
         </div>
 

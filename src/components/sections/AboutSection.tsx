@@ -1,17 +1,19 @@
 import Image from "next/image";
-import CTAButton from "@/components/ui/CTAButton";
+import BookingOpenButton from "@/components/ui/BookingOpenButton";
+import FadeInView from "@/components/ui/FadeInView";
 
 export default function AboutSection() {
   return (
     <section
       id="rolam"
-      className="py-20 bg-white"
+      className="py-16 md:py-32 bg-background"
       aria-labelledby="about-heading"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
           {/* Kép */}
+          <FadeInView>
           <div className="relative aspect-[4/5] w-full max-w-sm mx-auto lg:mx-0 rounded-3xl overflow-hidden shadow-xl">
             <Image
               src="/images/roli-portrait.jpg"
@@ -25,20 +27,22 @@ export default function AboutSection() {
               10+ év tapasztalat
             </div>
           </div>
+          </FadeInView>
 
           {/* Szöveg */}
+          <FadeInView delay={0.2}>
           <div>
             <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-2">
               Rólam
             </p>
             <h2
               id="about-heading"
-              className="text-3xl sm:text-4xl font-extrabold text-primary mb-6"
+              className="text-3xl sm:text-4xl font-medium text-primary mb-8"
             >
               Szia, Roli vagyok – <br className="hidden sm:block" />
               a te gerinced barátja
             </h2>
-            <div className="space-y-4 text-muted leading-relaxed">
+            <div className="space-y-5 text-muted leading-loose">
               <p>
                 Tizenéves koromban én is szenvedtem gerincsérvessel. Hónapokig jártam
                 orvostól orvosig, és mindenki azt mondta: &ldquo;éljek együtt
@@ -68,11 +72,12 @@ export default function AboutSection() {
             </ul>
 
             <div className="mt-8">
-              <CTAButton href="#idopontfoglalas" size="lg">
+              <BookingOpenButton size="lg">
                 Foglalj ingyenes konzultációt →
-              </CTAButton>
+              </BookingOpenButton>
             </div>
           </div>
+          </FadeInView>
         </div>
       </div>
     </section>

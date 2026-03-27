@@ -37,7 +37,7 @@ export default function BookingSection() {
 
   if (submitted) {
     return (
-      <section id="idopontfoglalas" className="py-20 bg-primary">
+      <section id="idopontfoglalas" className="py-16 md:py-32 bg-primary">
         <div className="max-w-xl mx-auto text-center px-4">
           <div className="text-6xl mb-4">🎉</div>
           <h2 className="text-3xl font-extrabold text-white mb-4">Köszönöm!</h2>
@@ -52,7 +52,7 @@ export default function BookingSection() {
   return (
     <section
       id="idopontfoglalas"
-      className="py-20 bg-primary"
+      className="py-16 md:py-32 bg-primary"
       aria-labelledby="booking-heading"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,7 +62,7 @@ export default function BookingSection() {
           </p>
           <h2
             id="booking-heading"
-            className="text-3xl sm:text-4xl font-extrabold text-white"
+            className="text-3xl sm:text-4xl font-medium text-white"
           >
             Kérj időpontot online!
           </h2>

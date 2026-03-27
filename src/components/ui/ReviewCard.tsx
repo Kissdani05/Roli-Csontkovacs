@@ -7,7 +7,7 @@ interface ReviewCardProps {
 
 export default function ReviewCard({ quote, name, location, stars = 5 }: ReviewCardProps) {
   return (
-    <article className="bg-white rounded-2xl p-6 shadow-sm border border-border flex flex-col gap-4">
+    <article className="bg-background rounded-3xl p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border hover:shadow-[0_16px_48px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col gap-4">
       {/* Csillagok */}
       <div className="flex gap-1" aria-label={`${stars} csillag az 5-ből`}>
         {Array.from({ length: 5 }).map((_, i) => (

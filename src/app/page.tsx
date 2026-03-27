@@ -5,7 +5,7 @@ import AboutSection from '@/components/sections/AboutSection';
 import FaqSection from '@/components/sections/FaqSection';
 import PricingSection from '@/components/sections/PricingSection';
 import ReviewsSection from '@/components/sections/ReviewsSection';
-import BookingSection from '@/components/sections/BookingSection';
+import FadeInView from '@/components/ui/FadeInView';
 
 export const metadata: Metadata = {
   title: 'Roli - Csontkovács és Manuálterápia | Józsa',
@@ -17,12 +17,11 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
-      <ServicesSection />
-      <AboutSection />
-      <FaqSection />
-      <PricingSection />
-      <ReviewsSection />
-      <BookingSection />
+      <FadeInView><AboutSection /></FadeInView>
+      <FadeInView><ServicesSection /></FadeInView>
+      <FadeInView><PricingSection /></FadeInView>
+      <FadeInView><FaqSection /></FadeInView>
+      <FadeInView><ReviewsSection /></FadeInView>
     </>
   );
 }

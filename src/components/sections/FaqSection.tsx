@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import FadeInView from "@/components/ui/FadeInView";
 
 interface FaqItem {
   question: string;
@@ -48,31 +49,31 @@ export default function FaqSection() {
   return (
     <section
       id="gyik"
-      className="py-20 bg-white"
+      className="py-16 md:py-32 bg-background"
       aria-labelledby="faq-heading"
     >
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-2">
+        <div className="text-center mb-16">
+          <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-3">
             Kérdések &amp; Válaszok
           </p>
           <h2
             id="faq-heading"
-            className="text-3xl sm:text-4xl font-extrabold text-primary"
+            className="text-3xl sm:text-4xl font-medium text-primary"
           >
             Gyakran Ismételt Kérdések
           </h2>
-          <p className="mt-4 text-muted max-w-xl mx-auto">
+          <p className="mt-6 text-muted max-w-xl mx-auto leading-relaxed">
             Első alkalommal sokakban merülnek fel kérdések. Íme a leggyakoribbak –
             ha a tiédet nem látod, hívj bátran!
           </p>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {faqs.map((faq, i) => (
+            <FadeInView key={i} delay={i * 0.07}>
             <div
-              key={i}
-              className="border border-border rounded-2xl overflow-hidden"
+              className="border border-border rounded-2xl overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-shadow duration-300"
             >
               <button
                 type="button"
@@ -106,6 +107,7 @@ export default function FaqSection() {
                 </p>
               </div>
             </div>
+            </FadeInView>
           ))}
         </div>
       </div>

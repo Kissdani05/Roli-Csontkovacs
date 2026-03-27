@@ -1,17 +1,18 @@
-import Link from "next/link";
-import { type AnchorHTMLAttributes } from "react";
+"use client";
+
+import { useBookingModal } from "./BookingModalContext";
+import { type ButtonHTMLAttributes } from "react";
 
 type Variant = "primary" | "outline";
 type Size = "sm" | "md" | "lg";
 
-interface ButtonProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
-  href: string;
+interface BookingOpenButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
 }
 
 const baseClass =
-  "inline-block font-semibold rounded-full transition-all duration-300 ease-in-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:-translate-y-0.5";
+  "inline-block font-semibold rounded-full transition-all duration-300 ease-in-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:-translate-y-0.5 cursor-pointer";
 
 const variantClass: Record<Variant, string> = {
   primary:
@@ -26,21 +27,22 @@ const sizeClass: Record<Size, string> = {
   lg: "px-8 py-4 text-lg",
 };
 
-export default function CTAButton({
-  href,
+export default function BookingOpenButton({
   variant = "primary",
   size = "md",
   children,
   className = "",
   ...props
-}: ButtonProps) {
+}: BookingOpenButtonProps) {
+  const { open } = useBookingModal();
   return (
-    <Link
-      href={href}
+    <button
+      type="button"
+      onClick={open}
       className={`${baseClass} ${variantClass[variant]} ${sizeClass[size]} ${className}`}
       {...props}
     >
       {children}
-    </Link>
+    </button>
   );
 }

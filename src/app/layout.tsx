@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Montserrat, Roboto } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import ConditionalShell from "@/components/ConditionalShell";
+import { BookingModalProvider } from "@/components/ui/BookingModalContext";
+import BookingModal from "@/components/ui/BookingModal";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -83,9 +84,12 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <BookingModalProvider>
+          <ConditionalShell>
+            {children}
+          </ConditionalShell>
+          <BookingModal />
+        </BookingModalProvider>
       </body>
     </html>
   );

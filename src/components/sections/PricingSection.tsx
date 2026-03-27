@@ -1,4 +1,5 @@
-import CTAButton from "@/components/ui/CTAButton";
+import BookingOpenButton from "@/components/ui/BookingOpenButton";
+import FadeInView from "@/components/ui/FadeInView";
 
 interface PricingPlan {
   name: string;
@@ -55,33 +56,34 @@ export default function PricingSection() {
   return (
     <section
       id="arak"
-      className="py-20 bg-surface"
+      className="py-16 md:py-32 bg-surface"
       aria-labelledby="pricing-heading"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-2">
+        <div className="text-center mb-16">
+          <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-3">
             Árak &amp; Csomagok
           </p>
           <h2
             id="pricing-heading"
-            className="text-3xl sm:text-4xl font-extrabold text-primary"
+            className="text-3xl sm:text-4xl font-medium text-primary"
           >
             Átlátható árazás, nincsenek rejtett költségek
           </h2>
-          <p className="mt-4 text-muted max-w-xl mx-auto">
+          <p className="mt-6 text-muted max-w-xl mx-auto leading-relaxed">
             Válaszd ki a számodra megfelelő csomagot. Kérdésed van? Hívj bátran!
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {plans.map((plan) => (
+          {plans.map((plan, i) => (
+            <FadeInView key={plan.name} delay={i * 0.12}>
             <article
               key={plan.name}
-              className={`relative rounded-2xl p-8 flex flex-col gap-6 border transition-all duration-300 ${
+              className={`relative rounded-3xl p-8 flex flex-col gap-6 border transition-all duration-300 ease-in-out ${
                 plan.highlighted
-                  ? "bg-primary text-white border-primary shadow-2xl scale-105"
-                  : "bg-white text-foreground border-border shadow-sm hover:shadow-md"
+                  ? "bg-primary text-white border-primary shadow-[0_20px_60px_rgb(26,75,130,0.25)] scale-105"
+                  : "bg-background text-foreground border-border shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_16px_48px_rgb(0,0,0,0.08)] hover:-translate-y-1"
               }`}
             >
               {plan.highlighted && (
@@ -144,8 +146,7 @@ export default function PricingSection() {
                 ))}
               </ul>
 
-              <CTAButton
-                href="#idopontfoglalas"
+              <BookingOpenButton
                 variant={plan.highlighted ? "outline" : "primary"}
                 size="md"
                 className={
@@ -155,8 +156,9 @@ export default function PricingSection() {
                 }
               >
                 Foglalok időpontot
-              </CTAButton>
+              </BookingOpenButton>
             </article>
+            </FadeInView>
           ))}
         </div>
 
