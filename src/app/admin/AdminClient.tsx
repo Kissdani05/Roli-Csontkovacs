@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
+import AnalyticsPanel from "./AnalyticsPanel";
 
 // ── types ────────────────────────────────────────────────────────────────────
 type BookingStatus = "pending" | "confirmed" | "cancelled";
@@ -9,6 +10,7 @@ type Booking = {
   id: number; date: string; time: string;
   name: string; phone: string; email: string | null; note: string | null;
   status: BookingStatus; appeared: number | null; created_at: string;
+  invoice_id: string | null;
 };
 type BlockItem = { id: number; date: string; time: string; reason: string; };
 type Patient = {
@@ -59,7 +61,7 @@ export default function AdminClient({ bookings: initial }: { bookings: Booking[]
   const today = new Date();
 
   // ── tabs ──────────────────────────────────────────────────────────────────
-  const [tab, setTab] = useState<"calendar" | "patients">("calendar");
+  const [tab, setTab] = useState<"calendar" | "patients" | "analytics">("calendar");
 
   // ── bookings ──────────────────────────────────────────────────────────────
   const [bookings, setBookings] = useState<Booking[]>(initial);
@@ -465,11 +467,11 @@ export default function AdminClient({ bookings: initial }: { bookings: Booking[]
 
       {/* ── Tab nav ───────────────────────────────────────────────── */}
       <div className="flex gap-1 mb-4 bg-white rounded-xl p-1 w-fit shadow-sm border border-[#C3D4E3]">
-        {(["calendar","patients"] as const).map(t => (
+        {(["calendar","patients","analytics"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all
               ${tab === t ? "bg-[#1A4B82] text-white shadow-sm" : "text-[#4C6579] hover:bg-[#E7F1F8]"}`}>
-            {t === "calendar" ? "📅 Naptár" : "👤 Páciensek"}
+            {t === "calendar" ? "📅 Naptár" : t === "patients" ? "👤 Páciensek" : "📊 Analitikák"}
           </button>
         ))}
       </div>
@@ -598,6 +600,11 @@ export default function AdminClient({ bookings: initial }: { bookings: Booking[]
                               {booking.appeared === 0 && (
                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600">✗ Nem jelent meg</span>
                               )}
+                              {booking.invoice_id && (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700" title={`Számlaszám: ${booking.invoice_id}`}>
+                                  🧾 {booking.invoice_id}
+                                </span>
+                              )}
                             </div>
                             <div className="text-xs text-[#4C6579] mt-0.5 space-x-3">
                               <span>{booking.phone}</span>
@@ -614,13 +621,15 @@ export default function AdminClient({ bookings: initial }: { bookings: Booking[]
                                   className="px-3 py-1 text-xs font-semibold rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors">Elutasít</button>
                                 <button onClick={e => { e.stopPropagation(); openEdit(booking); }}
                                   className="px-3 py-1 text-xs font-semibold rounded-lg bg-[#E7F1F8] text-[#1A4B82] hover:bg-[#C3D4E3] transition-colors">Módosít</button>
-                                {/* Megjelent? — csak ha az időpont már elkezdődött ma */}
+                                {/* Megjelent? — ha az időpont már elmúlt (múltbeli nap vagy mai elkezdett slot) */}
                                 {(() => {
                                   const now = new Date();
                                   const todayISO = toISO(now);
                                   const [bh, bm] = booking.time.split(":").map(Number);
-                                  const slotStarted = booking.date === todayISO &&
+                                  const isPastDay = booking.date < todayISO;
+                                  const isTodayStarted = booking.date === todayISO &&
                                     (now.getHours() > bh || (now.getHours() === bh && now.getMinutes() >= bm));
+                                  const slotStarted = isPastDay || isTodayStarted;
                                   if (!slotStarted) return null;
                                   if (appearPending === booking.id) return (
                                     <span className="flex items-center gap-1 ml-1">
@@ -784,6 +793,8 @@ export default function AdminClient({ bookings: initial }: { bookings: Booking[]
           )}
         </div>
       )}
+
+      {tab === "analytics" && <AnalyticsPanel bookings={bookings} />}
 
       {/* ── Confirm dialog ──────────────────────────────────────── */}
       {confirm && (

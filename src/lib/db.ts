@@ -18,6 +18,10 @@ db.pragma("journal_mode = WAL");
 
 // Meglévő DB-re: appeared oszlop hozzáadása ha hiányzik
 try { db.exec("ALTER TABLE bookings ADD COLUMN appeared INTEGER"); } catch { /* már létezik */ }
+// Meglévő DB-re: gcal_event_id oszlop hozzáadása ha hiányzik
+try { db.exec("ALTER TABLE bookings ADD COLUMN gcal_event_id TEXT"); } catch { /* már létezik */ }
+// Meglévő DB-re: invoice_id oszlop hozzáadása ha hiányzik
+try { db.exec("ALTER TABLE bookings ADD COLUMN invoice_id TEXT"); } catch { /* már létezik */ }
 
 // Tábla létrehozása ha még nem létezik
 db.exec(`
@@ -31,6 +35,7 @@ db.exec(`
     time        TEXT    NOT NULL,
     status      TEXT    NOT NULL DEFAULT 'pending',
     appeared    INTEGER,
+    gcal_event_id TEXT,
     created_at  TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
   );
 `);
@@ -71,6 +76,8 @@ export interface Booking {
   time: string;
   status: BookingStatus;
   appeared: number | null; // 1 = igen, 0 = nem, null = ismeretlen
+  gcal_event_id: string | null;
+  invoice_id: string | null;
   created_at: string;
 }
 
@@ -150,6 +157,15 @@ export function updateBookingStatus(id: number, status: BookingStatus): void {
 // Megjelenés rögzítése (1 = megjelent, 0 = nem jelent meg)
 export function updateAppearance(id: number, appeared: boolean): void {
   db.prepare("UPDATE bookings SET appeared = ? WHERE id = ?").run(appeared ? 1 : 0, id);
+}
+
+export function updateInvoiceId(id: number, invoiceId: string): void {
+  db.prepare("UPDATE bookings SET invoice_id = ? WHERE id = ?").run(invoiceId, id);
+}
+
+// Google Calendar event ID mentése
+export function updateGcalEventId(id: number, eventId: string | null): void {
+  db.prepare("UPDATE bookings SET gcal_event_id = ? WHERE id = ?").run(eventId, id);
 }
 
 // Foglalás törlése

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { updateBookingStatus, updateBooking, updateAppearance, getBookingById, isSlotTaken, type BookingStatus } from "@/lib/db";
-import { sendBookingConfirmedToCustomer, sendBookingCancelledToCustomer } from "@/lib/email";
+import { updateBookingStatus, updateBooking, updateAppearance, updateInvoiceId, getBookingById, isSlotTaken, type BookingStatus } from "@/lib/db";
+import { sendBookingConfirmedToCustomer, sendBookingCancelledToCustomer, sendBookingUpdatedToCustomer } from "@/lib/email";
+import { createInvoice } from "@/lib/szamlazz";
 
 const VALID_STATUSES: BookingStatus[] = ["pending", "confirmed", "cancelled"];
 
@@ -31,13 +32,15 @@ export async function PUT(
   if (!existing) return NextResponse.json({ error: "A foglalás nem található." }, { status: 404 });
 
   // Ütközés ellenőrzés – csak ha dátum vagy időpont változott, és más foglalás van ott
-  if (existing.date !== date || existing.time !== time) {
+  const slotChanged = existing.date !== date || existing.time !== time;
+  if (slotChanged) {
     if (isSlotTaken(date, time)) {
       return NextResponse.json({ error: "Ez az időpont már foglalt." }, { status: 409 });
     }
   }
 
   try {
+    const oldSlot = `${existing.date}, ${existing.time}`;
     updateBooking(id, {
       name: (name as string).trim(),
       phone: (phone as string).trim(),
@@ -46,7 +49,12 @@ export async function PUT(
       date: date as string,
       time: time as string,
     });
-    return NextResponse.json({ success: true, booking: getBookingById(id) });
+    const updated = getBookingById(id)!;
+    // Email + .ics küldés az ügyfélnek ha van email (státusztól függetlenül)
+    if (updated.email) {
+      void sendBookingUpdatedToCustomer(updated, slotChanged, slotChanged ? oldSlot : undefined);
+    }
+    return NextResponse.json({ success: true, booking: updated });
   } catch (err) {
     console.error(`[PUT /api/bookings/${id}]`, err);
     return NextResponse.json({ error: "Adatbázis hiba." }, { status: 500 });
@@ -83,6 +91,14 @@ export async function PATCH(
     if (!existing) return NextResponse.json({ error: "A foglalás nem található." }, { status: 404 });
     try {
       updateAppearance(id, appeared);
+      const updated = getBookingById(id)!;
+      // Ha megjelent (appeared=true) → számla kiállítás
+      if (appeared === true) {
+        void (async () => {
+          const invoiceId = await createInvoice(updated);
+          if (invoiceId) updateInvoiceId(id, invoiceId);
+        })();
+      }
       return NextResponse.json({ success: true, booking: getBookingById(id) });
     } catch (err) {
       console.error(`[PATCH /api/bookings/${id} appeared]`, err);
@@ -109,7 +125,6 @@ export async function PATCH(
     // ── Email küldés ────────────────────────────────────────────────────────
     if (status === "confirmed") void sendBookingConfirmedToCustomer(updated);
     if (status === "cancelled") void sendBookingCancelledToCustomer(updated);
-
     return NextResponse.json({ success: true, id, status });
   } catch (err) {
     console.error(`[PATCH /api/bookings/${id}]`, err);

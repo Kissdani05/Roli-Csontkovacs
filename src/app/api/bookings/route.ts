@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
       // Ügyfél foglalt: függőben visszaigazolás az ügyfélnek + értesítő az adminnak
       void sendBookingPendingToCustomer(booking);
       void sendNewBookingToAdmin(booking);
+      // Naptárba csak elfogadás után kerül (PATCH → confirmed)
     }
 
     return NextResponse.json({ success: true, booking }, { status: 201 });

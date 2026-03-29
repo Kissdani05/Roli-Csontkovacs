@@ -1,29 +1,23 @@
 import nodemailer from "nodemailer";
 import type { Booking } from "./db";
 
-// ── Transporter (lazy singleton) ─────────────────────────────────────────────
-let _transporter: nodemailer.Transporter | null = null;
-
+// ── Transporter ───────────────────────────────────────────────────────────────
 function getTransporter(): nodemailer.Transporter | null {
-  if (_transporter) return _transporter;
-
-  const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
-  if (!host || !user || !pass) {
-    console.warn("[email] SMTP env vars not configured — emails will be skipped.");
+  console.log(`[email] config → user=${user} pass_prefix=${pass ? pass.slice(0, 4) : "MISSING"} pass_len=${pass?.length ?? 0}`);
+
+  if (!user || !pass) {
+    console.warn("[email] SMTP_USER vagy SMTP_PASS hiányzik — emailek kihagyva.");
     return null;
   }
 
-  _transporter = nodemailer.createTransport({
-    host,
-    port: parseInt(process.env.SMTP_PORT ?? "587", 10),
-    secure: process.env.SMTP_SECURE === "true",
+  // service:'gmail' → nodemailer automatikusan port 465/SSL-t használ, app jelszóval működik
+  return nodemailer.createTransport({
+    service: "gmail",
     auth: { user, pass },
   });
-
-  return _transporter;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -80,15 +74,92 @@ function wrap(title: string, body: string): string {
 }
 
 // ── Send helper ────────────────────────────────────────────────────────────
-async function send(to: string, subject: string, html: string): Promise<void> {
+async function send(
+  to: string,
+  subject: string,
+  html: string,
+  icsContent?: string
+): Promise<void> {
   if (!to) return;
   const t = getTransporter();
   if (!t) return;
   try {
-    await t.sendMail({ from: FROM(), to, subject, html });
+    await t.sendMail({
+      from: FROM(),
+      to,
+      subject,
+      html,
+      ...(icsContent ? {
+        attachments: [{
+          filename: "idopont.ics",
+          content: icsContent,
+          contentType: "text/calendar; charset=utf-8; method=REQUEST",
+        }],
+      } : {}),
+    });
   } catch (err) {
     console.error(`[email] Failed to send "${subject}" to ${to}:`, err);
   }
+}
+
+// ── ICS naptármeghívó generálás ──────────────────────────────────────────────
+function generateICS(b: Booking): string {
+  // Budapest: UTC+1 télen, UTC+2 nyáron — egyszerűsítve: timezone-aware DTSTART
+  const [h, m] = b.time.split(":").map(Number);
+  const endH = Math.floor((h * 60 + m + 60) / 60) % 24;
+  const endM = (h * 60 + m + 60) % 60;
+
+  const datePart = b.date.replace(/-/g, "");
+  const startPart = `${String(h).padStart(2, "0")}${String(m).padStart(2, "0")}00`;
+  const endPart   = `${String(endH).padStart(2, "0")}${String(endM).padStart(2, "0")}00`;
+
+  const uid = `booking-${b.id}-${datePart}@rolicsontkovacs.hu`;
+  const now  = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const organizer = FROM().match(/<(.+)>/)?.at(1) ?? FROM();
+  const desc = [
+    `Telefon: ${b.phone}`,
+    b.note ? `Megjegyzés: ${b.note}` : "",
+  ].filter(Boolean).join("\\n");
+
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Roli Csontkovács//HU",
+    "METHOD:REQUEST",
+    "CALSCALE:GREGORIAN",
+    "BEGIN:VTIMEZONE",
+    "TZID:Europe/Budapest",
+    "END:VTIMEZONE",
+    "BEGIN:VEVENT",
+    `UID:${uid}`,
+    `DTSTAMP:${now}`,
+    `DTSTART;TZID=Europe/Budapest:${datePart}T${startPart}`,
+    `DTEND;TZID=Europe/Budapest:${datePart}T${endPart}`,
+    `SUMMARY:🦴 Csontkovács időpont – Roli`,
+    `DESCRIPTION:${desc}`,
+    `ORGANIZER;CN=Roli Csontkovács:mailto:${organizer}`,
+    `ATTENDEE;CN=${b.name};RSVP=FALSE:mailto:${b.email}`,
+    // 1 nap előtte
+    "BEGIN:VALARM",
+    "TRIGGER:-P1D",
+    "ACTION:DISPLAY",
+    "DESCRIPTION:Holnap csontkovács időpontod van!",
+    "END:VALARM",
+    // 2 óra előtte
+    "BEGIN:VALARM",
+    "TRIGGER:-PT2H",
+    "ACTION:DISPLAY",
+    "DESCRIPTION:2 óra múlva csontkovács időpontod van!",
+    "END:VALARM",
+    // 30 perc előtte
+    "BEGIN:VALARM",
+    "TRIGGER:-PT30M",
+    "ACTION:DISPLAY",
+    "DESCRIPTION:30 perc múlva csontkovács időpontod van!",
+    "END:VALARM",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
 }
 
 // ── 1. Ügyfél visszaigazolás (függőben) ──────────────────────────────────────
@@ -123,7 +194,7 @@ export async function sendNewBookingToAdmin(b: Booking): Promise<void> {
   await send(adminEmail, `📬 Új foglalás: ${b.name} – ${fmtSlot(b.date, b.time)}`, html);
 }
 
-// ── 3. Ügyfél: megerősítve ────────────────────────────────────────────────────
+// ── 3. Ügyfél: megerősítve + .ics naptármeghívó ─────────────────────────────
 export async function sendBookingConfirmedToCustomer(b: Booking): Promise<void> {
   if (!b.email) return;
   const html = wrap("Időpontod megerősítve", `
@@ -131,10 +202,11 @@ export async function sendBookingConfirmedToCustomer(b: Booking): Promise<void> 
     <p>Örömmel értesítelek, hogy megerősítettem az időpontodat:</p>
     <div class="slot">✅ ${fmtSlot(b.date, b.time)}</div>
     <p><span class="badge-green">Megerősítve</span></p>
+    <p>A csatolt <strong>.ics fájl</strong> megnyitásával egyetlen kattintással hozzáadhatod a naptáradhoz (Google, Apple, Outlook).</p>
     <p>Várlak az időpontban! Ha valami közbejön, kérlek jelezd előre.</p>
     <p>Üdvözlettel,<br/><strong>Roli</strong></p>
   `);
-  await send(b.email, "✅ Időpontod megerősítve", html);
+  await send(b.email, "✅ Időpontod megerősítve", html, generateICS(b));
 }
 
 // ── 4. Ügyfél: elutasítva ─────────────────────────────────────────────────────
@@ -151,7 +223,7 @@ export async function sendBookingCancelledToCustomer(b: Booking): Promise<void> 
   await send(b.email, "❌ Időpontod visszautasítva", html);
 }
 
-// ── 5. Ügyfél: admin hozta létre az időpontot ────────────────────────────────
+// ── 5. Ügyfél: admin hozta létre + .ics naptármeghívó ───────────────────────
 export async function sendAdminCreatedBookingToCustomer(b: Booking): Promise<void> {
   if (!b.email) return;
   const html = wrap("Időpontot rögzítettem számodra", `
@@ -159,10 +231,11 @@ export async function sendAdminCreatedBookingToCustomer(b: Booking): Promise<voi
     <p>Rögzítettem egy időpontot számodra:</p>
     <div class="slot">📅 ${fmtSlot(b.date, b.time)}</div>
     <p><span class="badge-green">Megerősítve</span></p>
+    <p>A csatolt <strong>.ics fájl</strong> megnyitásával egyetlen kattintással hozzáadhatod a naptáradhoz (Google, Apple, Outlook).</p>
     <p>Ha valami közbejön, kérlek jelezd előre.</p>
     <p>Üdvözlettel,<br/><strong>Roli</strong></p>
   `);
-  await send(b.email, `📅 Időpontod: ${fmtSlot(b.date, b.time)}`, html);
+  await send(b.email, `📅 Időpontod: ${fmtSlot(b.date, b.time)}`, html, generateICS(b));
 }
 
 // ── 6. Admin értesítő (admin hozta létre) ────────────────────────────────────
@@ -180,4 +253,34 @@ export async function sendAdminCreatedBookingToAdmin(b: Booking): Promise<void> 
     </table>
   `);
   await send(adminEmail, `🗓️ Admin foglalás: ${b.name} – ${fmtSlot(b.date, b.time)}`, html);
+}
+
+// ── 7. Ügyfél: foglalás módosítva ────────────────────────────────────────────
+// slotChanged=true → új .ics is megy (naptár frissítés)
+export async function sendBookingUpdatedToCustomer(
+  b: Booking,
+  slotChanged: boolean,
+  oldSlot?: string
+): Promise<void> {
+  if (!b.email) return;
+  const changeNote = slotChanged && oldSlot
+    ? `<p>⚠️ Az időpontod <strong>megváltozott</strong>. Régi időpont: <em>${oldSlot}</em></p>`
+    : "";
+  const icsNote = slotChanged
+    ? `<p>A csatolt <strong>.ics fájl</strong> megnyitásával frissítheted a naptáradban az időpontot (Google, Apple, Outlook).</p>`
+    : "";
+  const html = wrap("Foglalásod módosítva", `
+    <p>Kedves <strong>${b.name}</strong>!</p>
+    <p>Roli módosította a foglalásodat. Az aktuális adataid:</p>
+    ${changeNote}
+    <div class="slot">📅 ${fmtSlot(b.date, b.time)}</div>
+    <p><span class="badge-green">Megerősítve</span></p>
+    ${icsNote}
+    <p>Ha valami közbejön, kérlek jelezd előre.</p>
+    <p>Üdvözlettel,<br/><strong>Roli</strong></p>
+  `);
+  const subject = slotChanged
+    ? `📅 Időpontod megváltozott: ${fmtSlot(b.date, b.time)}`
+    : "ℹ️ Foglalásod adatai frissültek";
+  await send(b.email, subject, html, slotChanged ? generateICS(b) : undefined);
 }
