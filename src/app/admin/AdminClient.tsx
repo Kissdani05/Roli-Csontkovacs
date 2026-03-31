@@ -630,7 +630,7 @@ export default function AdminClient({ bookings: initial }: { bookings: Booking[]
                                   const isTodayStarted = booking.date === todayISO &&
                                     (now.getHours() > bh || (now.getHours() === bh && now.getMinutes() >= bm));
                                   const slotStarted = isPastDay || isTodayStarted;
-                                  if (!slotStarted) return null;
+                                  if (!slotStarted || booking.appeared !== null) return null;
                                   if (appearPending === booking.id) return (
                                     <span className="flex items-center gap-1 ml-1">
                                       <span className="text-xs text-[#4C6579] font-semibold">Megjelent?</span>
@@ -645,7 +645,7 @@ export default function AdminClient({ bookings: initial }: { bookings: Booking[]
                                   return (
                                     <button onClick={e => { e.stopPropagation(); setAppearPending(booking.id); }}
                                       className="px-3 py-1 text-xs font-semibold rounded-lg bg-violet-100 text-violet-700 hover:bg-violet-200 transition-colors ml-1">
-                                      {booking.appeared === null ? "Megjelent?" : "✎ Megjelenés"}
+                                      Megjelent?
                                     </button>
                                   );
                                 })()}

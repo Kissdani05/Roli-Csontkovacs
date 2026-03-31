@@ -45,13 +45,13 @@ function buildXml(b: Booking): string {
     <emailSzoveg>Mellékletben küldjük a számlát. Köszönjük!</emailSzoveg>
   </elado>
   <vevo>
-    <nev>${escXml(b.name)}</nev>
+    <nev>${escXml(b.billing_name ?? b.name)}</nev>
     <irsz>0000</irsz>
     <telepules>-</telepules>
     <cim>-</cim>
-    <email>${escXml(b.email ?? "")}</email>
-    <sendEmail>${b.email ? "true" : "false"}</sendEmail>
-    <telefonszam>${escXml(b.phone)}</telefonszam>
+    <email>${escXml(b.billing_email ?? b.email ?? "")}</email>
+    <sendEmail>${(b.billing_email ?? b.email) ? "true" : "false"}</sendEmail>
+    <telefonszam>${escXml(b.billing_phone ?? b.phone)}</telefonszam>
     <megjegyzes></megjegyzes>
   </vevo>
   <tetelek>

@@ -5,6 +5,7 @@ import AboutSection from '@/components/sections/AboutSection';
 import FaqSection from '@/components/sections/FaqSection';
 import PricingSection from '@/components/sections/PricingSection';
 import ReviewsSection from '@/components/sections/ReviewsSection';
+import BeforeAfterSection from '@/components/sections/BeforeAfterSection';
 import FadeInView from '@/components/ui/FadeInView';
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function HomePage() {
       <HeroSection />
       <FadeInView><AboutSection /></FadeInView>
       <FadeInView><ServicesSection /></FadeInView>
+      <FadeInView><BeforeAfterSection /></FadeInView>
       <FadeInView><PricingSection /></FadeInView>
       <FadeInView><FaqSection /></FadeInView>
       <FadeInView><ReviewsSection /></FadeInView>

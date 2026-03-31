@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Érvénytelen adatok." }, { status: 400 });
   }
 
-  const { name, phone, email, note, date, time, adminCreated } = body as Record<string, unknown>;
+  const { name, phone, email, note, date, time, adminCreated, billingName, billingPhone, billingEmail } = body as Record<string, unknown>;
 
   // Kötelező mezők ellenőrzése
   if (typeof name !== "string" || name.trim().length < 2) {
@@ -69,6 +69,9 @@ export async function POST(request: NextRequest) {
       note: typeof note === "string" ? note.trim() || undefined : undefined,
       date,
       time,
+      billing_name: typeof billingName === "string" ? billingName.trim() || undefined : undefined,
+      billing_phone: typeof billingPhone === "string" ? billingPhone.trim() || undefined : undefined,
+      billing_email: typeof billingEmail === "string" ? billingEmail.trim() || undefined : undefined,
     });
 
     // ── Email küldés ────────────────────────────────────────────────────────

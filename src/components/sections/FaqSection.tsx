@@ -49,64 +49,73 @@ export default function FaqSection() {
   return (
     <section
       id="gyik"
-      className="py-16 md:py-32 bg-background"
+      className="py-20 md:py-36 bg-[#0D1B2A]"
       aria-labelledby="faq-heading"
     >
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-3">
-            Kérdések &amp; Válaszok
-          </p>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-px w-8 bg-accent shrink-0" aria-hidden="true" />
+            <p className="text-accent font-semibold uppercase tracking-[0.18em] text-xs">Kérdések &amp; Válaszok</p>
+            <div className="h-px w-8 bg-accent shrink-0" aria-hidden="true" />
+          </div>
           <h2
             id="faq-heading"
-            className="text-3xl sm:text-4xl font-medium text-primary"
+            className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight"
           >
             Gyakran Ismételt Kérdések
           </h2>
-          <p className="mt-6 text-muted max-w-xl mx-auto leading-relaxed">
+          <p className="mt-5 text-white/55 max-w-xl mx-auto leading-relaxed text-[15px]">
             Első alkalommal sokakban merülnek fel kérdések. Íme a leggyakoribbak –
             ha a tiédet nem látod, hívj bátran!
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {faqs.map((faq, i) => (
-            <FadeInView key={i} delay={i * 0.07}>
-            <div
-              className="border border-border rounded-2xl overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-shadow duration-300"
-            >
-              <button
-                type="button"
-                onClick={() => toggle(i)}
-                aria-expanded={openIndex === i}
-                className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left font-semibold text-primary hover:bg-surface transition-colors"
-              >
-                <span>{faq.question}</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className={`w-5 h-5 flex-shrink-0 transition-transform duration-300 ${
-                    openIndex === i ? "rotate-180" : ""
-                  }`}
-                  aria-hidden="true"
+            <FadeInView key={i} delay={i * 0.06}>
+              <div className={`rounded-xl overflow-hidden border transition-all duration-300 ${
+                openIndex === i
+                  ? "border-accent/40 bg-white/5"
+                  : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+              }`}>
+                <button
+                  type="button"
+                  onClick={() => toggle(i)}
+                  aria-expanded={openIndex === i}
+                  className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left font-semibold text-white hover:text-accent transition-colors"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m19 9-7 7-7-7" />
-                </svg>
-              </button>
+                  <span className="flex items-center gap-3">
+                    <span className="text-accent/60 text-xs font-mono w-5 shrink-0">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    {faq.question}
+                  </span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className={`w-4 h-4 flex-shrink-0 text-accent transition-transform duration-300 ${
+                      openIndex === i ? "rotate-180" : ""
+                    }`}
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m19 9-7 7-7-7" />
+                  </svg>
+                </button>
 
-              <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  openIndex === i ? "max-h-96" : "max-h-0"
-                }`}
-              >
-                <p className="px-6 pb-5 text-sm text-muted leading-relaxed">
-                  {faq.answer}
-                </p>
+                <div
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    openIndex === i ? "max-h-96" : "max-h-0"
+                  }`}
+                >
+                  <p className="px-6 pb-5 pl-14 text-sm text-white/60 leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </div>
               </div>
-            </div>
             </FadeInView>
           ))}
         </div>

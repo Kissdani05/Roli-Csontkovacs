@@ -20,6 +20,8 @@ function BookingForm({ onClose }: { onClose: () => void }) {
   const [occupiedSlots, setOccupiedSlots] = useState<string[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [formData, setFormData] = useState({ name: "", phone: "", email: "", note: "" });
+  const [billingDifferent, setBillingDifferent] = useState(false);
+  const [billingData, setBillingData] = useState({ name: "", phone: "", email: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -82,6 +84,11 @@ function BookingForm({ onClose }: { onClose: () => void }) {
           note: formData.note,
           date: dateStr,
           time: selectedTime,
+          ...(billingDifferent && {
+            billingName: billingData.name,
+            billingPhone: billingData.phone,
+            billingEmail: billingData.email,
+          }),
         }),
       });
 
@@ -261,6 +268,93 @@ function BookingForm({ onClose }: { onClose: () => void }) {
               className="border border-border rounded-xl px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent resize-none"
             />
           </div>
+
+          {/* Számlázási adatok */}
+          <label className="flex items-start gap-3 cursor-pointer select-none group">
+            <div className="relative mt-0.5 shrink-0">
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={billingDifferent}
+                onChange={(e) => setBillingDifferent(e.target.checked)}
+              />
+              <div className={`w-5 h-5 rounded border-2 transition-colors duration-200 flex items-center justify-center ${
+                billingDifferent ? "bg-accent border-accent" : "border-border group-hover:border-accent/50"
+              }`}>
+                {billingDifferent && (
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white" className="w-3 h-3" aria-hidden="true">
+                    <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <span className="text-sm text-muted leading-snug">
+              Foglalási adataim <span className="font-medium text-foreground">nem egyeznek meg</span> a számlázási adataimmal
+            </span>
+          </label>
+
+          <AnimatePresence>
+            {billingDifferent && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                animate={{ opacity: 1, height: "auto", marginTop: 4 }}
+                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <div className="flex flex-col gap-4 border border-accent/30 rounded-xl p-4 bg-accent/5">
+                  <p className="text-xs text-accent font-semibold uppercase tracking-wide">Šmlázási adatok</p>
+
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="billing-name" className="text-sm font-medium text-foreground">
+                      Név a számlára <span className="text-red-500" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      id="billing-name"
+                      type="text"
+                      required={billingDifferent}
+                      autoComplete="billing name"
+                      placeholder="Pl. Kiss József"
+                      value={billingData.name}
+                      onChange={(e) => setBillingData({ ...billingData, name: e.target.value })}
+                      className="border border-border rounded-xl px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="billing-phone" className="text-sm font-medium text-foreground">
+                      Telefonszám a számlára <span className="text-red-500" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      id="billing-phone"
+                      type="tel"
+                      required={billingDifferent}
+                      autoComplete="billing tel"
+                      placeholder="+36 30 123 4567"
+                      value={billingData.phone}
+                      onChange={(e) => setBillingData({ ...billingData, phone: e.target.value })}
+                      className="border border-border rounded-xl px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="billing-email" className="text-sm font-medium text-foreground">
+                      Email cím a számlára
+                    </label>
+                    <input
+                      id="billing-email"
+                      type="email"
+                      autoComplete="billing email"
+                      placeholder="pl. nev@email.hu"
+                      value={billingData.email}
+                      onChange={(e) => setBillingData({ ...billingData, email: e.target.value })}
+                      className="border border-border rounded-xl px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {selectedDate && selectedTime && (
             <div className="bg-accent/10 border border-accent/20 rounded-xl px-4 py-3 text-sm text-accent font-medium">

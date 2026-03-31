@@ -22,6 +22,10 @@ try { db.exec("ALTER TABLE bookings ADD COLUMN appeared INTEGER"); } catch { /* 
 try { db.exec("ALTER TABLE bookings ADD COLUMN gcal_event_id TEXT"); } catch { /* már létezik */ }
 // Meglévő DB-re: invoice_id oszlop hozzáadása ha hiányzik
 try { db.exec("ALTER TABLE bookings ADD COLUMN invoice_id TEXT"); } catch { /* már létezik */ }
+// Meglévő DB-re: számlázási adatok hozzáadása ha hiányoznak
+try { db.exec("ALTER TABLE bookings ADD COLUMN billing_name TEXT"); } catch { /* már létezik */ }
+try { db.exec("ALTER TABLE bookings ADD COLUMN billing_phone TEXT"); } catch { /* már létezik */ }
+try { db.exec("ALTER TABLE bookings ADD COLUMN billing_email TEXT"); } catch { /* már létezik */ }
 
 // Tábla létrehozása ha még nem létezik
 db.exec(`
@@ -36,6 +40,9 @@ db.exec(`
     status      TEXT    NOT NULL DEFAULT 'pending',
     appeared    INTEGER,
     gcal_event_id TEXT,
+    billing_name  TEXT,
+    billing_phone TEXT,
+    billing_email TEXT,
     created_at  TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
   );
 `);
@@ -78,6 +85,9 @@ export interface Booking {
   appeared: number | null; // 1 = igen, 0 = nem, null = ismeretlen
   gcal_event_id: string | null;
   invoice_id: string | null;
+  billing_name: string | null;
+  billing_phone: string | null;
+  billing_email: string | null;
   created_at: string;
 }
 
@@ -88,13 +98,16 @@ export interface NewBooking {
   note?: string;
   date: string;
   time: string;
+  billing_name?: string;
+  billing_phone?: string;
+  billing_email?: string;
 }
 
 // Új foglalás mentése
 export function insertBooking(data: NewBooking): Booking {
   const stmt = db.prepare(`
-    INSERT INTO bookings (name, phone, email, note, date, time)
-    VALUES (@name, @phone, @email, @note, @date, @time)
+    INSERT INTO bookings (name, phone, email, note, date, time, billing_name, billing_phone, billing_email)
+    VALUES (@name, @phone, @email, @note, @date, @time, @billing_name, @billing_phone, @billing_email)
   `);
   const result = stmt.run({
     name: data.name,
@@ -103,6 +116,9 @@ export function insertBooking(data: NewBooking): Booking {
     note: data.note ?? null,
     date: data.date,
     time: data.time,
+    billing_name: data.billing_name ?? null,
+    billing_phone: data.billing_phone ?? null,
+    billing_email: data.billing_email ?? null,
   });
   return getBookingById(result.lastInsertRowid as number)!;
 }

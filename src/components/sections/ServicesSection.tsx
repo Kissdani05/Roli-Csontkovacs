@@ -62,16 +62,18 @@ export default function ServicesSection() {
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-3">
-            Miben segíthetek?
-          </p>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-px w-8 bg-accent shrink-0" aria-hidden="true" />
+            <p className="text-accent font-semibold uppercase tracking-[0.18em] text-xs">Miben segíthetek?</p>
+            <div className="h-px w-8 bg-accent shrink-0" aria-hidden="true" />
+          </div>
           <h2
             id="services-heading"
-            className="text-3xl sm:text-4xl font-medium text-primary"
+            className="text-3xl sm:text-4xl font-extrabold text-primary tracking-tight"
           >
             Milyen panaszokkal fordulhatsz hozzám?
           </h2>
-          <p className="mt-6 text-muted max-w-xl mx-auto leading-relaxed">
+          <p className="mt-5 text-muted max-w-xl mx-auto leading-relaxed text-[15px]">
             Széles körű tapasztalattal rendelkezem az alábbi panaszok kezelésében.
             Ha nem látod a tiédet, hívj bátran!
           </p>
