@@ -32,8 +32,8 @@ export async function PATCH(
     if (data.blacklisted !== undefined) {
       await setBlacklist(
         id,
-        !!data.blacklisted,
-        typeof data.blacklist_reason === "string" ? data.blacklist_reason : null
+        data.blacklisted ? 1 : 0,
+        typeof data.blacklist_reason === "string" ? data.blacklist_reason : undefined
       );
     }
     return NextResponse.json({ success: true });

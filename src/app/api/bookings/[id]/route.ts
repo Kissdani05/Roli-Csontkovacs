@@ -51,7 +51,10 @@ export async function PUT(
       date: date as string,
       time: time as string,
     });
-    const updated = await getBookingById(id);;
+    const updated = await getBookingById(id);
+    if (!updated) {
+      return NextResponse.json({ error: "A foglalás nem található." }, { status: 404 });
+    }
     // Email + .ics küldés az ügyfélnek ha van email (státusztól függetlenül)
     if (updated.email) {
       void sendBookingUpdatedToCustomer(updated, slotChanged, slotChanged ? oldSlot : undefined);
@@ -92,16 +95,19 @@ export async function PATCH(
     const existing = await getBookingById(id);
     if (!existing) return NextResponse.json({ error: "A foglalás nem található." }, { status: 404 });
     try {
-      await updateAppearance(id, appeared);
+      await updateAppearance(id, appeared ? 1 : 0);
       const updated = await getBookingById(id);
+      if (!updated) {
+        return NextResponse.json({ error: "A foglalás nem található." }, { status: 404 });
+      }
       // Ha megjelent (appeared=true) → számla kiállítás
       if (appeared === true) {
         void (async () => {
           const invoiceId = await createInvoice(updated);
-          if (invoiceId) updateInvoiceId(id, invoiceId);
+          if (invoiceId) await updateInvoiceId(id, invoiceId);
         })();
       }
-      return NextResponse.json({ success: true, booking: getBookingById(id) });
+      return NextResponse.json({ success: true, booking: updated });
     } catch (err) {
       console.error(`[PATCH /api/bookings/${id} appeared]`, err);
       return NextResponse.json({ error: "Adatbázis hiba." }, { status: 500 });
@@ -115,14 +121,17 @@ export async function PATCH(
     );
   }
 
-  const existing = getBookingById(id);
+  const existing = await getBookingById(id);
   if (!existing) {
     return NextResponse.json({ error: "A foglalás nem található." }, { status: 404 });
   }
 
   try {
-    updateBookingStatus(id, status as BookingStatus);
-    const updated = getBookingById(id)!;
+    await updateBookingStatus(id, status as BookingStatus);
+    const updated = await getBookingById(id);
+    if (!updated) {
+      return NextResponse.json({ error: "A foglalás nem található." }, { status: 404 });
+    }
 
     // ── Email küldés ────────────────────────────────────────────────────────
     if (status === "confirmed") void sendBookingConfirmedToCustomer(updated);

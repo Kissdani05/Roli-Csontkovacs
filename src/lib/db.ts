@@ -65,17 +65,19 @@ export interface Block {
 
 // ============ BOOKINGS ============
 
-export function getBookingById(id: number): Booking | null {
-  const client = pool;
+export async function getBookingById(id: number): Promise<Booking | null> {
+  const client = await pool.connect();
   try {
-    const result = client.querySync(
+    const result = await client.query<Booking>(
       "SELECT * FROM bookings WHERE id = $1",
       [id]
-    ) as QueryResult<Booking>;
+    );
     return result.rows[0] || null;
   } catch (err) {
     console.error("[getBookingById]", err);
     throw err;
+  } finally {
+    client.release();
   }
 }
 
