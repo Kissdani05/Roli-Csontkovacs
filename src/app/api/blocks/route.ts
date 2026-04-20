@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 // GET /api/blocks
 export async function GET() {
   try {
-    const blocks = getAllBlocks();
+    const blocks = await getAllBlocks();
     return NextResponse.json({ blocks });
   } catch (err) {
     console.error("[GET /api/blocks]", err);
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Érvénytelen időpont." }, { status: 422 });
   const reasonStr = typeof reason === "string" && reason.trim() ? reason.trim() : "Blokkolt";
   try {
-    const block = insertBlock(date, time, reasonStr);
+    const block = await insertBlock(date, time, reasonStr);
     return NextResponse.json({ block }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/blocks]", err);

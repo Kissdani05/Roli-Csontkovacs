@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const bookedSlots  = getOccupiedSlots(date);
-    const blockedSlots = getBlockedSlots(date);
+    const bookedSlots  = await getOccupiedSlots(date);
+    const blockedSlots = await getBlockedSlots(date);
     const occupiedSlots = Array.from(new Set([...bookedSlots, ...blockedSlots]));
     return NextResponse.json({ occupiedSlots });
   } catch (err) {

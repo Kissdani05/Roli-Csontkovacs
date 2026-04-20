@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 // GET /api/patients
 export async function GET() {
   try {
-    const patients = getAllPatients();
+    const patients = await getAllPatients();
     return NextResponse.json({ patients });
   } catch (err) {
     console.error("[GET /api/patients]", err);

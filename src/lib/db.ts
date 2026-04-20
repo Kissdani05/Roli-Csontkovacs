@@ -1,75 +1,16 @@
-import Database from "better-sqlite3";
-import path from "path";
-import fs from "fs";
+import { Pool, QueryResult } from "pg";
 
-// Az adatbázis fájl a projekt gyökerében lévő /data mappában lesz
-const DATA_DIR = path.join(process.cwd(), "data");
-const DB_PATH = path.join(DATA_DIR, "bookings.db");
+// PostgreSQL Pool létrehozása DATABASE_URL-ből
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  // SSL szükséges sok cloud hosztolásnál (pl. Coolify, Heroku)
+  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+});
 
-// Mappa létrehozása ha nem létezik
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-
-const db = new Database(DB_PATH);
-
-// WAL mód jobb teljesítményért
-db.pragma("journal_mode = WAL");
-
-// Meglévő DB-re: appeared oszlop hozzáadása ha hiányzik
-try { db.exec("ALTER TABLE bookings ADD COLUMN appeared INTEGER"); } catch { /* már létezik */ }
-// Meglévő DB-re: gcal_event_id oszlop hozzáadása ha hiányzik
-try { db.exec("ALTER TABLE bookings ADD COLUMN gcal_event_id TEXT"); } catch { /* már létezik */ }
-// Meglévő DB-re: invoice_id oszlop hozzáadása ha hiányzik
-try { db.exec("ALTER TABLE bookings ADD COLUMN invoice_id TEXT"); } catch { /* már létezik */ }
-// Meglévő DB-re: számlázási adatok hozzáadása ha hiányoznak
-try { db.exec("ALTER TABLE bookings ADD COLUMN billing_name TEXT"); } catch { /* már létezik */ }
-try { db.exec("ALTER TABLE bookings ADD COLUMN billing_phone TEXT"); } catch { /* már létezik */ }
-try { db.exec("ALTER TABLE bookings ADD COLUMN billing_email TEXT"); } catch { /* már létezik */ }
-
-// Tábla létrehozása ha még nem létezik
-db.exec(`
-  CREATE TABLE IF NOT EXISTS bookings (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT    NOT NULL,
-    phone       TEXT    NOT NULL,
-    email       TEXT,
-    note        TEXT,
-    date        TEXT    NOT NULL,
-    time        TEXT    NOT NULL,
-    status      TEXT    NOT NULL DEFAULT 'pending',
-    appeared    INTEGER,
-    gcal_event_id TEXT,
-    billing_name  TEXT,
-    billing_phone TEXT,
-    billing_email TEXT,
-    created_at  TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
-  );
-`);
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS blocks (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    date       TEXT NOT NULL,
-    time       TEXT NOT NULL,
-    reason     TEXT NOT NULL DEFAULT 'Blokkolt',
-    UNIQUE(date, time)
-  );
-`);
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS patients (
-    id               INTEGER PRIMARY KEY AUTOINCREMENT,
-    phone            TEXT UNIQUE NOT NULL,
-    name             TEXT NOT NULL,
-    email            TEXT,
-    birth_date       TEXT,
-    notes            TEXT,
-    blacklisted      INTEGER NOT NULL DEFAULT 0,
-    blacklist_reason TEXT,
-    created_at       TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
-  );
-`);
+// Elszigetelődés kapcsolatok esetén
+pool.on("error", (err) => {
+  console.error("Váratlan hiba a PostgreSQL pool-ban:", err);
+});
 
 export type BookingStatus = "pending" | "confirmed" | "cancelled";
 
@@ -98,132 +39,11 @@ export interface NewBooking {
   note?: string;
   date: string;
   time: string;
-  billing_name?: string;
-  billing_phone?: string;
-  billing_email?: string;
+  billingName?: string;
+  billingPhone?: string;
+  billingEmail?: string;
 }
 
-// Új foglalás mentése
-export function insertBooking(data: NewBooking): Booking {
-  const stmt = db.prepare(`
-    INSERT INTO bookings (name, phone, email, note, date, time, billing_name, billing_phone, billing_email)
-    VALUES (@name, @phone, @email, @note, @date, @time, @billing_name, @billing_phone, @billing_email)
-  `);
-  const result = stmt.run({
-    name: data.name,
-    phone: data.phone,
-    email: data.email ?? null,
-    note: data.note ?? null,
-    date: data.date,
-    time: data.time,
-    billing_name: data.billing_name ?? null,
-    billing_phone: data.billing_phone ?? null,
-    billing_email: data.billing_email ?? null,
-  });
-  return getBookingById(result.lastInsertRowid as number)!;
-}
-
-// Egy foglalás lekérése ID alapján
-export function getBookingById(id: number): Booking | undefined {
-  return db
-    .prepare("SELECT * FROM bookings WHERE id = ?")
-    .get(id) as Booking | undefined;
-}
-
-// Összes foglalás lekérése (dátum/idő szerint)
-export function getAllBookings(): Booking[] {
-  return db
-    .prepare("SELECT * FROM bookings ORDER BY date ASC, time ASC")
-    .all() as Booking[];
-}
-
-// Egy adott időrés foglalt-e (pending vagy confirmed státuszú foglalás van-e rá)
-export function isSlotTaken(date: string, time: string): boolean {
-  const row = db
-    .prepare(
-      "SELECT 1 FROM bookings WHERE date = ? AND time = ? AND status IN ('pending', 'confirmed') LIMIT 1"
-    )
-    .get(date, time);
-  return row !== undefined;
-}
-
-// Egy adott napra lefoglalt időpontok listája
-export function getOccupiedSlots(date: string): string[] {
-  const rows = db
-    .prepare(
-      "SELECT time FROM bookings WHERE date = ? AND status IN ('pending', 'confirmed')"
-    )
-    .all(date) as { time: string }[];
-  return rows.map((r) => r.time);
-}
-
-// Foglalás adatainak módosítása
-export function updateBooking(id: number, data: NewBooking): void {
-  db.prepare(`
-    UPDATE bookings SET name = @name, phone = @phone, email = @email, note = @note, date = @date, time = @time
-    WHERE id = @id
-  `).run({ id, name: data.name, phone: data.phone, email: data.email ?? null, note: data.note ?? null, date: data.date, time: data.time });
-}
-
-// Foglalás státuszának frissítése
-export function updateBookingStatus(id: number, status: BookingStatus): void {
-  db.prepare("UPDATE bookings SET status = ? WHERE id = ?").run(status, id);
-}
-
-// Megjelenés rögzítése (1 = megjelent, 0 = nem jelent meg)
-export function updateAppearance(id: number, appeared: boolean): void {
-  db.prepare("UPDATE bookings SET appeared = ? WHERE id = ?").run(appeared ? 1 : 0, id);
-}
-
-export function updateInvoiceId(id: number, invoiceId: string): void {
-  db.prepare("UPDATE bookings SET invoice_id = ? WHERE id = ?").run(invoiceId, id);
-}
-
-// Google Calendar event ID mentése
-export function updateGcalEventId(id: number, eventId: string | null): void {
-  db.prepare("UPDATE bookings SET gcal_event_id = ? WHERE id = ?").run(eventId, id);
-}
-
-// Foglalás törlése
-export function deleteBooking(id: number): void {
-  db.prepare("DELETE FROM bookings WHERE id = ?").run(id);
-}
-
-// ── Blocks ─────────────────────────────────────────────────────────────────
-export interface Block {
-  id: number;
-  date: string;
-  time: string;
-  reason: string;
-}
-
-export function insertBlock(date: string, time: string, reason: string): Block {
-  const stmt = db.prepare(
-    "INSERT OR REPLACE INTO blocks (date, time, reason) VALUES (?, ?, ?)"
-  );
-  const result = stmt.run(date, time, reason);
-  return db.prepare("SELECT * FROM blocks WHERE id = ?").get(result.lastInsertRowid) as Block;
-}
-
-export function removeBlock(date: string, time: string): void {
-  db.prepare("DELETE FROM blocks WHERE date = ? AND time = ?").run(date, time);
-}
-
-export function getAllBlocks(): Block[] {
-  return db.prepare("SELECT * FROM blocks ORDER BY date ASC, time ASC").all() as Block[];
-}
-
-export function getBlockedSlots(date: string): string[] {
-  const rows = db.prepare("SELECT time FROM blocks WHERE date = ?").all(date) as { time: string }[];
-  return rows.map(r => r.time);
-}
-
-export function isSlotBlocked(date: string, time: string): boolean {
-  const row = db.prepare("SELECT 1 FROM blocks WHERE date = ? AND time = ? LIMIT 1").get(date, time);
-  return row !== undefined;
-}
-
-// ── Patients ───────────────────────────────────────────────────────────────
 export interface Patient {
   id: number;
   phone: string;
@@ -231,78 +51,333 @@ export interface Patient {
   email: string | null;
   birth_date: string | null;
   notes: string | null;
-  blacklisted: boolean;
+  blacklisted: number;
   blacklist_reason: string | null;
   created_at: string;
 }
 
-function rowToPatient(row: Record<string, unknown>): Patient {
-  return { ...(row as Omit<Patient, "blacklisted">), blacklisted: row.blacklisted === 1 };
+export interface Block {
+  id: number;
+  date: string;
+  time: string;
+  reason: string;
 }
 
-export function getAllPatients(): Patient[] {
-  const rows = db.prepare("SELECT * FROM patients ORDER BY name ASC").all() as Record<string, unknown>[];
-  return rows.map(rowToPatient);
+// ============ BOOKINGS ============
+
+export function getBookingById(id: number): Booking | null {
+  const client = pool;
+  try {
+    const result = client.querySync(
+      "SELECT * FROM bookings WHERE id = $1",
+      [id]
+    ) as QueryResult<Booking>;
+    return result.rows[0] || null;
+  } catch (err) {
+    console.error("[getBookingById]", err);
+    throw err;
+  }
 }
 
-export function getPatientByPhone(phone: string): Patient | undefined {
-  const [a, b] = phoneVariants(phone);
-  const row = db.prepare("SELECT * FROM patients WHERE phone IN (?, ?) LIMIT 1").get(a, b) as Record<string, unknown> | undefined;
-  return row ? rowToPatient(row) : undefined;
+export async function insertBooking(booking: NewBooking, status = "pending"): Promise<Booking> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<Booking>(
+      `INSERT INTO bookings (name, phone, email, note, date, time, status, billing_name, billing_phone, billing_email, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+       RETURNING *`,
+      [
+        booking.name,
+        booking.phone,
+        booking.email || null,
+        booking.note || null,
+        booking.date,
+        booking.time,
+        status,
+        booking.billingName || null,
+        booking.billingPhone || null,
+        booking.billingEmail || null,
+      ]
+    );
+    return result.rows[0];
+  } finally {
+    client.release();
+  }
 }
 
-export function upsertPatient(phone: string, name: string, email?: string): Patient {
-  // Always store the canonical (+36...) form so variants deduplicate
-  const canonical = normalizePhone(phone);
-  db.prepare(
-    `INSERT INTO patients (phone, name, email) VALUES (?, ?, ?)
-     ON CONFLICT(phone) DO UPDATE SET
-       name  = COALESCE(excluded.name,  patients.name),
-       email = COALESCE(excluded.email, patients.email)`
-  ).run(canonical, name, email ?? null);
-  return getPatientByPhone(canonical)!;
+export async function getAllBookings(): Promise<Booking[]> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<Booking>(
+      "SELECT * FROM bookings ORDER BY date DESC, time DESC"
+    );
+    return result.rows;
+  } finally {
+    client.release();
+  }
 }
 
-export function updatePatientProfile(id: number, data: {
-  name?: string; email?: string; birth_date?: string | null; notes?: string | null;
-}): void {
-  const sets: string[] = [];
-  const vals: unknown[] = [];
-  if (data.name       !== undefined) { sets.push("name = ?");       vals.push(data.name); }
-  if (data.email      !== undefined) { sets.push("email = ?");      vals.push(data.email); }
-  if (data.birth_date !== undefined) { sets.push("birth_date = ?"); vals.push(data.birth_date); }
-  if (data.notes      !== undefined) { sets.push("notes = ?");      vals.push(data.notes); }
-  if (sets.length === 0) return;
-  vals.push(id);
-  db.prepare(`UPDATE patients SET ${sets.join(", ")} WHERE id = ?`).run(...vals);
+export async function updateBookingStatus(id: number, status: BookingStatus): Promise<Booking> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<Booking>(
+      "UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *",
+      [status, id]
+    );
+    return result.rows[0];
+  } finally {
+    client.release();
+  }
 }
 
-export function setBlacklist(id: number, blacklisted: boolean, reason?: string | null): void {
-  db.prepare("UPDATE patients SET blacklisted = ?, blacklist_reason = ? WHERE id = ?")
-    .run(blacklisted ? 1 : 0, reason ?? null, id);
+export async function updateBooking(
+  id: number,
+  { name, phone, email, note, date, time }: Partial<NewBooking>
+): Promise<Booking> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<Booking>(
+      `UPDATE bookings SET name = COALESCE($1, name), phone = COALESCE($2, phone), 
+       email = COALESCE($3, email), note = COALESCE($4, note), 
+       date = COALESCE($5, date), time = COALESCE($6, time) 
+       WHERE id = $7 RETURNING *`,
+      [name, phone, email, note, date, time, id]
+    );
+    return result.rows[0];
+  } finally {
+    client.release();
+  }
 }
 
-// Normalise HU phone numbers so 06XXXXXXXXX and +36XXXXXXXXX are treated as the same
-function normalizePhone(p: string): string {
-  const s = p.trim();
-  if (s.startsWith("06")) return "+36" + s.slice(2);
-  return s;
-}
-function phoneVariants(phone: string): [string, string] {
-  const canonical = normalizePhone(phone);
-  const alt = canonical.startsWith("+36") ? "0" + canonical.slice(3) : canonical;
-  return [canonical, alt];
+export async function updateAppearance(id: number, appeared: number): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query("UPDATE bookings SET appeared = $1 WHERE id = $2", [appeared, id]);
+  } finally {
+    client.release();
+  }
 }
 
-export function isPhoneBlacklisted(phone: string): boolean {
-  const [a, b] = phoneVariants(phone);
-  return db.prepare(
-    "SELECT 1 FROM patients WHERE phone IN (?, ?) AND blacklisted = 1 LIMIT 1"
-  ).get(a, b) !== undefined;
+export async function updateInvoiceId(id: number, invoiceId: string): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query("UPDATE bookings SET invoice_id = $1 WHERE id = $2", [invoiceId, id]);
+  } finally {
+    client.release();
+  }
 }
 
-export function isEmailBlacklisted(email: string): boolean {
-  return db.prepare("SELECT 1 FROM patients WHERE email = ? AND blacklisted = 1 LIMIT 1").get(email) !== undefined;
+export async function updateGcalEventId(id: number, gcalEventId: string): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query("UPDATE bookings SET gcal_event_id = $1 WHERE id = $2", [
+      gcalEventId,
+      id,
+    ]);
+  } finally {
+    client.release();
+  }
 }
 
-export default db;
+// ============ BLOCKS ============
+
+export async function getAllBlocks(): Promise<Block[]> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<Block>(
+      "SELECT * FROM blocks ORDER BY date, time"
+    );
+    return result.rows;
+  } finally {
+    client.release();
+  }
+}
+
+export async function insertBlock(date: string, time: string, reason = "Blokkolt"): Promise<Block> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<Block>(
+      "INSERT INTO blocks (date, time, reason) VALUES ($1, $2, $3) RETURNING *",
+      [date, time, reason]
+    );
+    return result.rows[0];
+  } finally {
+    client.release();
+  }
+}
+
+export async function removeBlock(date: string, time: string): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query("DELETE FROM blocks WHERE date = $1 AND time = $2", [date, time]);
+  } finally {
+    client.release();
+  }
+}
+
+export async function getBlockedSlots(date: string): Promise<string[]> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<{ time: string }>(
+      "SELECT time FROM blocks WHERE date = $1 ORDER BY time",
+      [date]
+    );
+    return result.rows.map(row => row.time);
+  } finally {
+    client.release();
+  }
+}
+
+// ============ PATIENTS ============
+
+export async function getAllPatients(): Promise<Patient[]> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<Patient>(
+      "SELECT * FROM patients ORDER BY created_at DESC"
+    );
+    return result.rows;
+  } finally {
+    client.release();
+  }
+}
+
+export async function getPatientByPhone(phone: string): Promise<Patient | null> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<Patient>(
+      "SELECT * FROM patients WHERE phone = $1",
+      [phone]
+    );
+    return result.rows[0] || null;
+  } finally {
+    client.release();
+  }
+}
+
+export async function upsertPatient(phone: string, name: string, email?: string): Promise<Patient> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<Patient>(
+      `INSERT INTO patients (phone, name, email, created_at) VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (phone) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email
+       RETURNING *`,
+      [phone, name, email || null]
+    );
+    return result.rows[0];
+  } finally {
+    client.release();
+  }
+}
+
+export async function updatePatientProfile(
+  id: number,
+  { name, email, birth_date, notes }: Partial<Patient>
+): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query(
+      `UPDATE patients SET 
+       name = COALESCE($1, name),
+       email = COALESCE($2, email),
+       birth_date = COALESCE($3, birth_date),
+       notes = COALESCE($4, notes)
+       WHERE id = $5`,
+      [name, email, birth_date, notes, id]
+    );
+  } finally {
+    client.release();
+  }
+}
+
+export async function setBlacklist(
+  id: number,
+  blacklisted: number,
+  reason?: string
+): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query(
+      "UPDATE patients SET blacklisted = $1, blacklist_reason = $2 WHERE id = $3",
+      [blacklisted, reason || null, id]
+    );
+  } finally {
+    client.release();
+  }
+}
+
+// ============ BOOKING SLOTS ============
+
+export async function getOccupiedSlots(date: string): Promise<string[]> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<{ time: string }>(
+      "SELECT DISTINCT time FROM bookings WHERE date = $1 AND status IN ('pending', 'confirmed')",
+      [date]
+    );
+    return result.rows.map(row => row.time);
+  } finally {
+    client.release();
+  }
+}
+
+export async function isSlotTaken(date: string, time: string): Promise<boolean> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<{ count: string }>(
+      "SELECT COUNT(*) as count FROM bookings WHERE date = $1 AND time = $2 AND status IN ('pending', 'confirmed')",
+      [date, time]
+    );
+    return parseInt(result.rows[0]?.count || "0", 10) > 0;
+  } finally {
+    client.release();
+  }
+}
+
+export async function isSlotBlocked(date: string, time: string): Promise<boolean> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<{ count: string }>(
+      "SELECT COUNT(*) as count FROM blocks WHERE date = $1 AND time = $2",
+      [date, time]
+    );
+    return parseInt(result.rows[0]?.count || "0", 10) > 0;
+  } finally {
+    client.release();
+  }
+}
+
+// ============ VALIDATION ============
+
+export async function isPhoneBlacklisted(phone: string): Promise<boolean> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<{ blacklisted: number }>(
+      "SELECT blacklisted FROM patients WHERE phone = $1",
+      [phone]
+    );
+    return result.rows[0]?.blacklisted === 1;
+  } finally {
+    client.release();
+  }
+}
+
+export async function isEmailBlacklisted(email: string): Promise<boolean> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<{ count: string }>(
+      `SELECT COUNT(*) as count FROM bookings 
+       WHERE email = $1 AND status = 'cancelled' 
+       GROUP BY email HAVING COUNT(*) > 2`,
+      [email]
+    );
+    return parseInt(result.rows[0]?.count || "0", 10) > 2;
+  } finally {
+    client.release();
+  }
+}
+
+// Pool lezárása (graceful shutdown)
+process.on("exit", async () => {
+  await pool.end();
+});

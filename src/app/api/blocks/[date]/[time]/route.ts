@@ -10,7 +10,7 @@ export async function DELETE(
 ) {
   const { date, time } = await params;
   try {
-    removeBlock(date, decodeURIComponent(time));
+    await removeBlock(date, decodeURIComponent(time));
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[DELETE /api/blocks]", err);

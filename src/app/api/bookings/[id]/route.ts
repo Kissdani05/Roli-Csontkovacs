@@ -30,20 +30,20 @@ export async function PUT(
   if (typeof date !== "string" || !date.trim()) return NextResponse.json({ error: "A dátum megadása kötelező." }, { status: 422 });
   if (typeof time !== "string" || !time.trim()) return NextResponse.json({ error: "Az időpont megadása kötelező." }, { status: 422 });
 
-  const existing = getBookingById(id);
+  const existing = await getBookingById(id);
   if (!existing) return NextResponse.json({ error: "A foglalás nem található." }, { status: 404 });
 
   // Ütközés ellenőrzés – csak ha dátum vagy időpont változott, és más foglalás van ott
   const slotChanged = existing.date !== date || existing.time !== time;
   if (slotChanged) {
-    if (isSlotTaken(date, time)) {
+    if (await isSlotTaken(date, time)) {
       return NextResponse.json({ error: "Ez az időpont már foglalt." }, { status: 409 });
     }
   }
 
   try {
     const oldSlot = `${existing.date}, ${existing.time}`;
-    updateBooking(id, {
+    await updateBooking(id, {
       name: (name as string).trim(),
       phone: (phone as string).trim(),
       email: typeof email === "string" && email.trim() ? email.trim() : undefined,
@@ -51,7 +51,7 @@ export async function PUT(
       date: date as string,
       time: time as string,
     });
-    const updated = getBookingById(id)!;
+    const updated = await getBookingById(id);;
     // Email + .ics küldés az ügyfélnek ha van email (státusztól függetlenül)
     if (updated.email) {
       void sendBookingUpdatedToCustomer(updated, slotChanged, slotChanged ? oldSlot : undefined);
@@ -89,11 +89,11 @@ export async function PATCH(
     if (typeof appeared !== "boolean") {
       return NextResponse.json({ error: "Az appeared mezőnek boolean értéknek kell lennie." }, { status: 422 });
     }
-    const existing = getBookingById(id);
+    const existing = await getBookingById(id);
     if (!existing) return NextResponse.json({ error: "A foglalás nem található." }, { status: 404 });
     try {
-      updateAppearance(id, appeared);
-      const updated = getBookingById(id)!;
+      await updateAppearance(id, appeared);
+      const updated = await getBookingById(id);
       // Ha megjelent (appeared=true) → számla kiállítás
       if (appeared === true) {
         void (async () => {

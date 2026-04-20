@@ -22,7 +22,7 @@ export async function PATCH(
 
   try {
     if (data.birth_date !== undefined || data.notes !== undefined || data.name !== undefined || data.email !== undefined) {
-      updatePatientProfile(id, {
+      await updatePatientProfile(id, {
         name:       typeof data.name       === "string" ? data.name       : undefined,
         email:      typeof data.email      === "string" ? data.email      : undefined,
         birth_date: typeof data.birth_date === "string" ? data.birth_date : (data.birth_date === null ? null : undefined),
@@ -30,7 +30,7 @@ export async function PATCH(
       });
     }
     if (data.blacklisted !== undefined) {
-      setBlacklist(
+      await setBlacklist(
         id,
         !!data.blacklisted,
         typeof data.blacklist_reason === "string" ? data.blacklist_reason : null
@@ -59,7 +59,7 @@ export async function POST(
   if (typeof name !== "string" || !name.trim())
     return NextResponse.json({ error: "A név kötelező." }, { status: 422 });
   try {
-    const patient = upsertPatient(phone.trim(), name.trim(), typeof email === "string" ? email.trim() : undefined);
+    const patient = await upsertPatient(phone.trim(), name.trim(), typeof email === "string" ? email.trim() : undefined);
     return NextResponse.json({ patient });
   } catch (err) {
     console.error("[POST /api/patients/upsert]", err);

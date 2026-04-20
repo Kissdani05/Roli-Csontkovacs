@@ -44,36 +44,36 @@ export async function POST(request: NextRequest) {
 
   try {
     // Feketelistás-ellenőrzés
-    if (isPhoneBlacklisted(phone.trim())) {
+    if (await isPhoneBlacklisted(phone.trim())) {
       return NextResponse.json({ error: "Ez a telefonszám le van tiltva a rendszerből." }, { status: 403 });
     }
-    if (typeof email === "string" && email.trim() && isEmailBlacklisted(email.trim())) {
+    if (typeof email === "string" && email.trim() && await isEmailBlacklisted(email.trim())) {
       return NextResponse.json({ error: "Ez az e-mail cím le van tiltva a rendszerből." }, { status: 403 });
     }
 
     // Blokkolt időpont ellenőrzés
-    if (isSlotBlocked(date, time)) {
+    if (await isSlotBlocked(date, time)) {
       return NextResponse.json({ error: "Ez az időpont blokkolt, nem foglalható." }, { status: 409 });
     }
 
     // Ütközés ellenőrzés – ha az időpont már foglalt, visszautasítjuk
-    if (isSlotTaken(date, time)) {
+    if (await isSlotTaken(date, time)) {
       return NextResponse.json(
         { error: "Ez az időpont már foglalt. Kérlek válassz másikat." },
         { status: 409 }
       );
     }
 
-    const booking = insertBooking({
+    const booking = await insertBooking({
       name: name.trim(),
       phone: phone.trim(),
       email: typeof email === "string" ? email.trim() || undefined : undefined,
       note: typeof note === "string" ? note.trim() || undefined : undefined,
       date,
       time,
-      billing_name: typeof billingName === "string" ? billingName.trim() || undefined : undefined,
-      billing_phone: typeof billingPhone === "string" ? billingPhone.trim() || undefined : undefined,
-      billing_email: typeof billingEmail === "string" ? billingEmail.trim() || undefined : undefined,
+      billingName: typeof billingName === "string" ? billingName.trim() || undefined : undefined,
+      billingPhone: typeof billingPhone === "string" ? billingPhone.trim() || undefined : undefined,
+      billingEmail: typeof billingEmail === "string" ? billingEmail.trim() || undefined : undefined,
     });
 
     // ── Email küldés ────────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
 // GET /api/bookings – összes foglalás (admin)
 export async function GET() {
   try {
-    const bookings = getAllBookings();
+    const bookings = await getAllBookings();
     return NextResponse.json({ bookings });
   } catch (err) {
     console.error("[GET /api/bookings]", err);
