@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { upsertPatient, updatePatientProfile, setBlacklist, getPatientByPhone } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 // PATCH /api/patients/[id]
 // Body: { phone, name, email?, birth_date?, notes?, blacklisted?, blacklist_reason? }
 export async function PATCH(

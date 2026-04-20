@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getAllPatients } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/patients
 export async function GET() {
   try {

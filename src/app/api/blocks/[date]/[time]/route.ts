@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { removeBlock } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 // DELETE /api/blocks/[date]/[time]
 export async function DELETE(
   _request: NextRequest,

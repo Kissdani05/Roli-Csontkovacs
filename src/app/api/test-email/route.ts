@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;

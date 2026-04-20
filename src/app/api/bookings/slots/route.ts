@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOccupiedSlots, getBlockedSlots } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/bookings/slots?date=YYYY-MM-DD
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

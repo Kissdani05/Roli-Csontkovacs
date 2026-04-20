@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllBlocks, insertBlock } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/blocks
 export async function GET() {
   try {

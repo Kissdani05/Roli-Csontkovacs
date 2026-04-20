@@ -3,6 +3,8 @@ import { updateBookingStatus, updateBooking, updateAppearance, updateInvoiceId, 
 import { sendBookingConfirmedToCustomer, sendBookingCancelledToCustomer, sendBookingUpdatedToCustomer } from "@/lib/email";
 import { createInvoice } from "@/lib/szamlazz";
 
+export const dynamic = 'force-dynamic';
+
 const VALID_STATUSES: BookingStatus[] = ["pending", "confirmed", "cancelled"];
 
 // PUT /api/bookings/[id] – foglalás adatainak módosítása

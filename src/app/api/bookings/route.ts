@@ -7,6 +7,8 @@ import {
   sendAdminCreatedBookingToAdmin,
 } from "@/lib/email";
 
+export const dynamic = 'force-dynamic';
+
 // POST /api/bookings – új foglalás mentése
 export async function POST(request: NextRequest) {
   let body: unknown;
