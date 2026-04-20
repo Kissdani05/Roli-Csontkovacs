@@ -86,6 +86,18 @@ async function ensureSchema(): Promise<void> {
 
       await client.query("CREATE UNIQUE INDEX IF NOT EXISTS patients_phone_unique_idx ON patients (phone)");
       await client.query("CREATE UNIQUE INDEX IF NOT EXISTS blocks_date_time_unique_idx ON blocks (date, time)");
+
+      // Migráció után a sequence-ek lemaradhatnak a MAX(id) mögött.
+      // Ez megelőzi a duplicate key hibát új INSERT-eknél.
+      await client.query(
+        "SELECT setval(pg_get_serial_sequence('bookings', 'id'), COALESCE((SELECT MAX(id) FROM bookings), 0) + 1, false)"
+      );
+      await client.query(
+        "SELECT setval(pg_get_serial_sequence('blocks', 'id'), COALESCE((SELECT MAX(id) FROM blocks), 0) + 1, false)"
+      );
+      await client.query(
+        "SELECT setval(pg_get_serial_sequence('patients', 'id'), COALESCE((SELECT MAX(id) FROM patients), 0) + 1, false)"
+      );
     } finally {
       client.release();
     }
