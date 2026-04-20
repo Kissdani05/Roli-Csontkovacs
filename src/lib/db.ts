@@ -1,10 +1,16 @@
 import { Pool, QueryResult } from "pg";
 
+const databaseUrl = process.env.DATABASE_URL || "";
+const forceSsl = process.env.DB_SSL === "true";
+const disableSsl = process.env.DB_SSL === "false";
+const urlRequiresSsl = /sslmode=require/i.test(databaseUrl);
+const shouldUseSsl = !disableSsl && (forceSsl || urlRequiresSsl);
+
 // PostgreSQL Pool létrehozása DATABASE_URL-ből
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  // SSL szükséges sok cloud hosztolásnál (pl. Coolify, Heroku)
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+  connectionString: databaseUrl,
+  // Coolify belső PostgreSQL általában SSL nélküli, külső managed DB gyakran SSL-es.
+  ssl: shouldUseSsl ? { rejectUnauthorized: false } : false,
 });
 
 // Elszigetelődés kapcsolatok esetén
