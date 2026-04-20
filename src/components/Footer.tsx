@@ -14,7 +14,7 @@ export default function Footer() {
               Roli <span className="text-accent">Csontkovács</span>
             </h2>
             <p className="text-white/55 text-sm leading-relaxed">
-              Csontkovács és manuálterapeuta Debrecen&nbsp;–&nbsp;Józsán.<br />
+              Csontkovác és manuálterapeuta Debrecen&nbsp;–&nbsp;Józsán.<br />
               Fájdalommentes életet segítek elérni – természetes úton.
             </p>
           </div>
