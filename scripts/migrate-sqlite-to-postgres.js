@@ -14,12 +14,17 @@ const DATABASE_URL = process.env.DATABASE_URL;
 
 if (!DATABASE_URL) {
   console.error("❌ DATABASE_URL nincs beállítva a .env.local-ban!");
+  console.error("   Ellenőrizd: .env.local fájl EXISTS?");
+  console.error("   DATABASE_URL=postgresql://user:pass@host:5432/db");
   process.exit(1);
 }
 
 console.log("🔄 Migrációs script indítása...");
 console.log(`📁 SQLite forrás: ${SQLITE_DB_PATH}`);
-console.log(`🐘 PostgreSQL cél: ${DATABASE_URL.split("@")[1]}`);
+// Csak az URL egy részét logozz (biztonságosabb - nem látszik a jelszó teljes egésze)
+const urlParts = DATABASE_URL.split("@");
+const safeUrl = urlParts[0].split("://")[0] + "://***:***@" + (urlParts[1] || "???");
+console.log(`🐘 PostgreSQL cél: ${safeUrl}`);
 
 const sqliteDb = new Database(SQLITE_DB_PATH);
 const pool = new Pool({ connectionString: DATABASE_URL });
