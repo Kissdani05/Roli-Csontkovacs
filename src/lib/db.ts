@@ -13,6 +13,92 @@ const pool = new Pool({
   ssl: shouldUseSsl ? { rejectUnauthorized: false } : false,
 });
 
+let schemaReadyPromise: Promise<void> | null = null;
+
+async function ensureSchema(): Promise<void> {
+  if (schemaReadyPromise) {
+    return schemaReadyPromise;
+  }
+
+  schemaReadyPromise = (async () => {
+    const client = await pool.connect();
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS bookings (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          phone VARCHAR(255) NOT NULL,
+          email VARCHAR(255),
+          note TEXT,
+          date VARCHAR(10) NOT NULL,
+          time VARCHAR(10) NOT NULL,
+          status VARCHAR(50) NOT NULL DEFAULT 'pending',
+          appeared INTEGER,
+          gcal_event_id VARCHAR(255),
+          invoice_id VARCHAR(255),
+          billing_name VARCHAR(255),
+          billing_phone VARCHAR(255),
+          billing_email VARCHAR(255),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS blocks (
+          id SERIAL PRIMARY KEY,
+          date VARCHAR(10) NOT NULL,
+          time VARCHAR(10) NOT NULL,
+          reason VARCHAR(255) NOT NULL DEFAULT 'Blokkolt',
+          UNIQUE(date, time)
+        );
+      `);
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS patients (
+          id SERIAL PRIMARY KEY,
+          phone VARCHAR(255) UNIQUE NOT NULL,
+          name VARCHAR(255) NOT NULL,
+          email VARCHAR(255),
+          birth_date VARCHAR(10),
+          notes TEXT,
+          blacklisted INTEGER NOT NULL DEFAULT 0,
+          blacklist_reason TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      await client.query("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS status VARCHAR(50) NOT NULL DEFAULT 'pending'");
+      await client.query("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS appeared INTEGER");
+      await client.query("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS gcal_event_id VARCHAR(255)");
+      await client.query("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS invoice_id VARCHAR(255)");
+      await client.query("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS billing_name VARCHAR(255)");
+      await client.query("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS billing_phone VARCHAR(255)");
+      await client.query("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS billing_email VARCHAR(255)");
+      await client.query("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+
+      await client.query("ALTER TABLE blocks ADD COLUMN IF NOT EXISTS reason VARCHAR(255) NOT NULL DEFAULT 'Blokkolt'");
+
+      await client.query("ALTER TABLE patients ADD COLUMN IF NOT EXISTS blacklisted INTEGER NOT NULL DEFAULT 0");
+      await client.query("ALTER TABLE patients ADD COLUMN IF NOT EXISTS blacklist_reason TEXT");
+      await client.query("ALTER TABLE patients ADD COLUMN IF NOT EXISTS birth_date VARCHAR(10)");
+      await client.query("ALTER TABLE patients ADD COLUMN IF NOT EXISTS notes TEXT");
+      await client.query("ALTER TABLE patients ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+
+      await client.query("CREATE UNIQUE INDEX IF NOT EXISTS patients_phone_unique_idx ON patients (phone)");
+      await client.query("CREATE UNIQUE INDEX IF NOT EXISTS blocks_date_time_unique_idx ON blocks (date, time)");
+    } finally {
+      client.release();
+    }
+  })();
+
+  try {
+    await schemaReadyPromise;
+  } catch (err) {
+    schemaReadyPromise = null;
+    throw err;
+  }
+}
+
 // Elszigetelődés kapcsolatok esetén
 pool.on("error", (err) => {
   console.error("Váratlan hiba a PostgreSQL pool-ban:", err);
@@ -88,6 +174,7 @@ export async function getBookingById(id: number): Promise<Booking | null> {
 }
 
 export async function insertBooking(booking: NewBooking, status = "pending"): Promise<Booking> {
+  await ensureSchema();
   const client = await pool.connect();
   try {
     const result = await client.query<Booking>(
@@ -114,6 +201,7 @@ export async function insertBooking(booking: NewBooking, status = "pending"): Pr
 }
 
 export async function getAllBookings(): Promise<Booking[]> {
+  await ensureSchema();
   const client = await pool.connect();
   try {
     const result = await client.query<Booking>(
@@ -190,6 +278,7 @@ export async function updateGcalEventId(id: number, gcalEventId: string): Promis
 // ============ BLOCKS ============
 
 export async function getAllBlocks(): Promise<Block[]> {
+  await ensureSchema();
   const client = await pool.connect();
   try {
     const result = await client.query<Block>(
@@ -224,6 +313,7 @@ export async function removeBlock(date: string, time: string): Promise<void> {
 }
 
 export async function getBlockedSlots(date: string): Promise<string[]> {
+  await ensureSchema();
   const client = await pool.connect();
   try {
     const result = await client.query<{ time: string }>(
@@ -239,6 +329,7 @@ export async function getBlockedSlots(date: string): Promise<string[]> {
 // ============ PATIENTS ============
 
 export async function getAllPatients(): Promise<Patient[]> {
+  await ensureSchema();
   const client = await pool.connect();
   try {
     const result = await client.query<Patient>(
@@ -317,6 +408,7 @@ export async function setBlacklist(
 // ============ BOOKING SLOTS ============
 
 export async function getOccupiedSlots(date: string): Promise<string[]> {
+  await ensureSchema();
   const client = await pool.connect();
   try {
     const result = await client.query<{ time: string }>(
@@ -330,6 +422,7 @@ export async function getOccupiedSlots(date: string): Promise<string[]> {
 }
 
 export async function isSlotTaken(date: string, time: string): Promise<boolean> {
+  await ensureSchema();
   const client = await pool.connect();
   try {
     const result = await client.query<{ count: string }>(
@@ -343,6 +436,7 @@ export async function isSlotTaken(date: string, time: string): Promise<boolean> 
 }
 
 export async function isSlotBlocked(date: string, time: string): Promise<boolean> {
+  await ensureSchema();
   const client = await pool.connect();
   try {
     const result = await client.query<{ count: string }>(
@@ -358,6 +452,7 @@ export async function isSlotBlocked(date: string, time: string): Promise<boolean
 // ============ VALIDATION ============
 
 export async function isPhoneBlacklisted(phone: string): Promise<boolean> {
+  await ensureSchema();
   const client = await pool.connect();
   try {
     const result = await client.query<{ blacklisted: number }>(
@@ -371,6 +466,7 @@ export async function isPhoneBlacklisted(phone: string): Promise<boolean> {
 }
 
 export async function isEmailBlacklisted(email: string): Promise<boolean> {
+  await ensureSchema();
   const client = await pool.connect();
   try {
     const result = await client.query<{ count: string }>(
