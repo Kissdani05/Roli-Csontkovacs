@@ -6,10 +6,11 @@
 
 const Database = require("better-sqlite3");
 const path = require("path");
+const fs = require("fs");
 const { Pool } = require("pg");
 require("dotenv").config({ path: path.resolve(process.cwd(), ".env.local") });
 
-const SQLITE_DB_PATH = path.join(process.cwd(), "data/bookings.db");
+const SQLITE_DB_PATH = process.env.SQLITE_DB_PATH || path.join(process.cwd(), "data/bookings.db");
 const DATABASE_URL = process.env.DATABASE_URL;
 
 if (!DATABASE_URL) {
@@ -25,6 +26,15 @@ console.log(`📁 SQLite forrás: ${SQLITE_DB_PATH}`);
 const urlParts = DATABASE_URL.split("@");
 const safeUrl = urlParts[0].split("://")[0] + "://***:***@" + (urlParts[1] || "???");
 console.log(`🐘 PostgreSQL cél: ${safeUrl}`);
+
+if (!fs.existsSync(SQLITE_DB_PATH)) {
+  console.error("❌ SQLite forrásfájl nem található:", SQLITE_DB_PATH);
+  console.error("   A migrációhoz szükség van a korábbi local adatbázis fájlra.");
+  console.error("   Tippek:");
+  console.error("   1) Másold fel a bookings.db fájlt a konténerbe /app/data/bookings.db útvonalra.");
+  console.error("   2) Vagy add meg külön forrásként: SQLITE_DB_PATH=/elérési/út/bookings.db npm run migrate");
+  process.exit(1);
+}
 
 const sqliteDb = new Database(SQLITE_DB_PATH);
 const pool = new Pool({ connectionString: DATABASE_URL });
